@@ -11,7 +11,7 @@ from pathlib import Path
 import urllib.parse
 from datetime import datetime
 
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 
 try:
     import markdown
@@ -19,6 +19,21 @@ except ImportError:
     print("Error: 'markdown' package not found.")
     print("Install it with: pip3 install markdown")
     sys.exit(1)
+
+
+def parse_frontmatter(content):
+    """Extract frontmatter dict and remaining content from markdown text."""
+    if not content.startswith('---'):
+        return None, content
+    parts = content.split('---', 2)
+    if len(parts) < 3:
+        return None, content
+    frontmatter = {}
+    for line in parts[1].strip().splitlines():
+        if ':' in line:
+            key, _, value = line.partition(':')
+            frontmatter[key.strip()] = value.strip()
+    return frontmatter, parts[2]
 
 
 class MarkdownHandler(SimpleHTTPRequestHandler):
@@ -116,9 +131,20 @@ class MarkdownHandler(SimpleHTTPRequestHandler):
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
 
+            # Parse and strip frontmatter
+            frontmatter, content = parse_frontmatter(content)
+
             # Convert markdown to HTML
             md = markdown.Markdown(extensions=['fenced_code', 'tables', 'nl2br'])
             html_content = md.convert(content)
+
+            # Render frontmatter as HTML table
+            frontmatter_html = ""
+            if frontmatter:
+                rows = ""
+                for key, value in frontmatter.items():
+                    rows += f"<tr><td class=\"fm-key\">{html.escape(key)}</td><td>{html.escape(value)}</td></tr>\n"
+                frontmatter_html = f'<div class="frontmatter"><table>{rows}</table></div>\n'
 
             # Calculate the base URL for relative links
             # This ensures links in markdown are relative to the file's directory
@@ -126,7 +152,7 @@ class MarkdownHandler(SimpleHTTPRequestHandler):
             base_url = f"/{base_path}/" if str(base_path) != '.' else "/"
 
             # Wrap in a nice HTML template
-            html = f"""<!DOCTYPE html>
+            page = f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -189,10 +215,32 @@ class MarkdownHandler(SimpleHTTPRequestHandler):
             max-width: 100%;
             height: auto;
         }}
+        .frontmatter {{
+            background: #f8f9fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 4px 12px;
+            margin-bottom: 24px;
+            font-size: 0.85em;
+            color: #586069;
+        }}
+        .frontmatter table {{
+            width: auto;
+            margin: 8px 0;
+            border: none;
+        }}
+        .frontmatter td {{
+            border: none;
+            padding: 2px 12px 2px 0;
+        }}
+        .frontmatter .fm-key {{
+            font-weight: 600;
+            color: #444;
+        }}
     </style>
 </head>
 <body>
-    {html_content}
+    {frontmatter_html}{html_content}
 </body>
 </html>"""
 
@@ -200,7 +248,7 @@ class MarkdownHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'text/html; charset=utf-8')
             self.end_headers()
-            self.wfile.write(html.encode('utf-8'))
+            self.wfile.write(page.encode('utf-8'))
 
         except Exception as e:
             self.send_error(500, f"Error rendering markdown: {str(e)}")
