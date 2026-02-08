@@ -47,3 +47,16 @@ max-module-lines = 200
 
 [tool.pylint.design]
 max-statements = 30
+
+[tool.pylint."messages control"]
+disable = [
+    "missing-function-docstring",
+    "missing-class-docstring",
+    "redefined-outer-name",
+    "duplicate-code",
+    "unused-variable",
+    "attribute-defined-outside-init",
+]
+
+[tool.pylint.basic]
+good-names = ["i", "j", "k", "e", "f", "h", "fm", "md", "ek", "ev", "srv"]
