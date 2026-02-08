@@ -11,7 +11,7 @@ from pathlib import Path
 import urllib.parse
 from datetime import datetime
 
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 
 try:
     import markdown
