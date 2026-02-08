@@ -338,7 +338,12 @@ class MarkdownHandler(SimpleHTTPRequestHandler):
 def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
 
-    server = HTTPServer(('', port), MarkdownHandler)
+    try:
+        server = HTTPServer(('', port), MarkdownHandler)
+    except OSError as e:
+        print(f"Error: Port {port} is already in use.")
+        sys.exit(1)
+
     print(f"=" * 60)
     print(f"Markdown Server v{VERSION}")
     print(f"=" * 60)

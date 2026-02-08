@@ -31,6 +31,12 @@ viewmd          # Starts on port 8000
 viewmd 3000     # Custom port
 ```
 
+## Upgrade
+
+```bash
+pipx upgrade viewmd
+```
+
 ## Uninstallation
 
 ```bash
