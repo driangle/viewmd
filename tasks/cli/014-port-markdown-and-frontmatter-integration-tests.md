@@ -1,7 +1,7 @@
 ---
 id: "014"
 title: "Port markdown and frontmatter integration tests"
-status: pending
+status: completed
 priority: medium
 tags: ["go", "testing"]
 parent: "007"
@@ -17,11 +17,11 @@ Port the Python `TestServeMarkdownFrontmatter` integration tests to Go, verifyin
 
 ## Tasks
 
-- [ ] Test frontmatter rendered as HTML table (basic.md: div.frontmatter, table, fm-key class, title/date values)
-- [ ] Test no frontmatter produces no table (plain.md)
-- [ ] Test frontmatter HTML escaping (escaping.md: no raw `<script>` tags)
-- [ ] Test frontmatter stripped from body (stripped.md: "status: draft" not in body after frontmatter div)
-- [ ] Test frontmatter CSS classes present in output
+- [x] Test frontmatter rendered as HTML table (basic.md: div.frontmatter, table, fm-key class, title/date values)
+- [x] Test no frontmatter produces no table (plain.md)
+- [x] Test frontmatter HTML escaping (escaping.md: no raw `<script>` tags)
+- [x] Test frontmatter stripped from body (stripped.md: "status: draft" not in body after frontmatter div)
+- [x] Test frontmatter CSS classes present in output
 
 ## Acceptance Criteria
 
