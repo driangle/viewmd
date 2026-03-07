@@ -1,0 +1,7 @@
+#!/bin/sh
+# Pre-commit hook: run linters for Go and Python
+
+set -e
+
+echo "Running lint checks..."
+make lint

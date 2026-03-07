@@ -12,7 +12,7 @@ created: 2026-03-07
 
 ## Objective
 
-Implement `classify.IsTextFile(name string) bool` in `internal/classify/` matching the Python `MarkdownHandler.is_text_file()` logic.
+Implement `classify.IsTextFile(name string) bool` in `apps/cli/internal/classify/` matching the Python `MarkdownHandler.is_text_file()` logic.
 
 ## Tasks
 

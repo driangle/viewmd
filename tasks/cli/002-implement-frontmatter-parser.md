@@ -12,7 +12,7 @@ created: 2026-03-07
 
 ## Objective
 
-Implement `frontmatter.Parse(content string) (map[string]string, string)` in `internal/frontmatter/` that exactly matches the Python `parse_frontmatter()` behavior.
+Implement `frontmatter.Parse(content string) (map[string]string, string)` in `apps/cli/internal/frontmatter/` that exactly matches the Python `parse_frontmatter()` behavior.
 
 ## Tasks
 

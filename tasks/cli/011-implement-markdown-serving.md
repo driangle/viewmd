@@ -18,10 +18,10 @@ Implement the markdown file rendering path: read `.md` files, parse frontmatter,
 ## Tasks
 
 - [ ] Configure goldmark with fenced code blocks and tables extensions
-- [ ] Read markdown file, parse frontmatter using `internal/frontmatter`
+- [ ] Read markdown file, parse frontmatter using `apps/cli/internal/frontmatter`
 - [ ] Convert markdown body to HTML
 - [ ] Compute base URL from file's parent directory
-- [ ] Render full HTML page using `internal/render` templates
+- [ ] Render full HTML page using `apps/cli/internal/render` templates
 - [ ] Handle errors (file read failures, rendering errors) with 500 responses
 
 ## Acceptance Criteria

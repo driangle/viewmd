@@ -12,7 +12,7 @@ created: 2026-03-07
 
 ## Objective
 
-Create Go `html/template` templates in `internal/render/` that produce the same HTML/CSS output as the Python `render.py` functions, embedded via `embed.FS`.
+Create Go `html/template` templates in `apps/cli/internal/render/` that produce the same HTML/CSS output as the Python `render.py` functions, embedded via `embed.FS`.
 
 ## Tasks
 

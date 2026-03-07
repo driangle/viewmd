@@ -17,11 +17,12 @@ Rewrite viewmd as a Go CLI that achieves feature parity with the current Python 
 ## Architecture
 
 ```
-cmd/viewmd/main.go      — Entry point, CLI arg parsing, server startup
-internal/handler/        — HTTP handler (routing, response helpers)
-internal/frontmatter/    — parse_frontmatter equivalent
-internal/render/         — HTML template rendering (markdown page, text page, directory page)
-internal/classify/       — File type classification (text extensions, known filenames, dotfiles)
+apps/cli/
+  cmd/viewmd/main.go      — Entry point, CLI arg parsing, server startup
+  internal/handler/        — HTTP handler (routing, response helpers)
+  internal/frontmatter/    — parse_frontmatter equivalent
+  internal/render/         — HTML template rendering (markdown page, text page, directory page)
+  internal/classify/       — File type classification (text extensions, known filenames, dotfiles)
 ```
 
 ### Key Dependencies
@@ -41,9 +42,9 @@ goldmark is the de facto Go markdown library. It supports fenced code blocks and
 
 ### Phase 1: Project Scaffolding
 
-- [ ] Initialize Go module (`go mod init github.com/driangle/viewmd`)
-- [ ] Set up directory structure (`cmd/`, `internal/`)
-- [ ] Add `Makefile` with `build`, `test`, `lint` targets
+- [ ] Initialize Go module (`go mod init github.com/driangle/viewmd/apps/cli`)
+- [ ] Set up directory structure (`apps/cli/cmd/`, `apps/cli/internal/`)
+- [ ] Add `Makefile` with `build`, `test`, `lint` targets (root + `apps/cli/`)
 - [ ] Add goldmark dependency
 
 ### Phase 2: Frontmatter Parser

@@ -13,7 +13,7 @@ created: 2026-03-07
 
 ## Objective
 
-Build the core HTTP handler in `internal/handler/` with the request routing logic and directory listing functionality, matching the Python `MarkdownHandler.do_GET()` dispatch.
+Build the core HTTP handler in `apps/cli/internal/handler/` with the request routing logic and directory listing functionality, matching the Python `MarkdownHandler.do_GET()` dispatch.
 
 ## Tasks
 

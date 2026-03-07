@@ -12,7 +12,7 @@ created: 2026-03-07
 
 ## Objective
 
-Wire up `cmd/viewmd/main.go` as the CLI entry point that parses args, starts the HTTP server, and handles graceful shutdown.
+Wire up `apps/cli/cmd/viewmd/main.go` as the CLI entry point that parses args, starts the HTTP server, and handles graceful shutdown.
 
 ## Tasks
 

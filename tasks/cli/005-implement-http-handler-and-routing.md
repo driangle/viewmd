@@ -12,7 +12,7 @@ created: 2026-03-07
 
 ## Objective
 
-Implement the HTTP request handler in `internal/handler/` that routes requests to the correct rendering path, matching the Python `MarkdownHandler.do_GET()` behavior.
+Implement the HTTP request handler in `apps/cli/internal/handler/` that routes requests to the correct rendering path, matching the Python `MarkdownHandler.do_GET()` behavior.
 
 ## Tasks
 

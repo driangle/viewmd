@@ -1,7 +1,7 @@
 ---
 id: "001"
 title: "Initialize Go project scaffolding"
-status: pending
+status: completed
 priority: high
 dependencies: []
 tags: ["go", "setup"]
@@ -16,12 +16,13 @@ Set up the Go project structure for the viewmd Python-to-Go migration. This is t
 
 ## Tasks
 
-- [ ] Run `go mod init github.com/driangle/viewmd`
-- [ ] Create directory structure: `cmd/viewmd/`, `internal/handler/`, `internal/frontmatter/`, `internal/render/`, `internal/classify/`
-- [ ] Create minimal `cmd/viewmd/main.go` entry point
-- [ ] Add placeholder `.go` files in each `internal/` package
-- [ ] Add `github.com/yuin/goldmark` dependency
-- [ ] Create `Makefile` with `build`, `test`, and `lint` targets
+- [x] Run `go mod init github.com/driangle/viewmd/apps/cli`
+- [x] Create directory structure: `apps/cli/cmd/viewmd/`, `apps/cli/internal/handler/`, `apps/cli/internal/frontmatter/`, `apps/cli/internal/render/`, `apps/cli/internal/classify/`
+- [x] Create minimal `apps/cli/cmd/viewmd/main.go` entry point
+- [x] Add placeholder `.go` files in each `apps/cli/internal/` package
+- [x] Add `github.com/yuin/goldmark` dependency
+- [x] Create `apps/cli/Makefile` with `build`, `test`, and `lint` targets
+- [x] Create root `Makefile` delegating to `apps/cli/`
 
 ## Acceptance Criteria
 
