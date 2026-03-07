@@ -1,4 +1,4 @@
-.PHONY: build test lint clean setup
+.PHONY: build test lint clean setup install
 
 build:
 	$(MAKE) -C apps/cli build
@@ -9,6 +9,9 @@ test:
 lint:
 	$(MAKE) -C apps/cli lint
 	pylint viewmd.py tests/
+
+install:
+	$(MAKE) -C apps/cli install
 
 clean:
 	$(MAKE) -C apps/cli clean

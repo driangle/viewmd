@@ -18,5 +18,6 @@
 {{if .HasParent}}<li><a href="/{{.ParentHref}}" class="dir">..</a></li>
 {{end}}{{range .Items}}<li><a href="/{{.Href}}" class="{{.CSSClass}}">{{.Label}}</a></li>
 {{end}}    </ul>
+    <footer style="margin-top:40px;padding-top:8px;border-top:1px solid #eee;font-size:0.75em;color:#999;">viewmd {{.Version}}</footer>
 </body>
 </html>

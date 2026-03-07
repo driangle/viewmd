@@ -8,6 +8,9 @@ import (
 	"io"
 )
 
+// Version is set by the main package at startup.
+var Version string
+
 //go:embed templates/*.html
 var templateFS embed.FS
 
@@ -30,6 +33,7 @@ func RenderMarkdownPage(w io.Writer, fileName string, frontmatter map[string]str
 		Frontmatter:     frontmatter,
 		FrontmatterRows: rows,
 		BodyHTML:        template.HTML(bodyHTML),
+		Version:         Version,
 	}
 	return templates.ExecuteTemplate(w, "markdown.html", data)
 }
@@ -40,6 +44,7 @@ func RenderTextPage(w io.Writer, fileName string, escapedContent string) error {
 	data := textData{
 		FileName: fileName,
 		Content:  template.HTML(escapedContent),
+		Version:  Version,
 	}
 	return templates.ExecuteTemplate(w, "text.html", data)
 }
@@ -52,6 +57,7 @@ func RenderDirectoryPage(w io.Writer, displayPath string, parentHref *string, it
 		HasParent:   parentHref != nil,
 		ParentHref:  "",
 		Items:       items,
+		Version:     Version,
 	}
 	if parentHref != nil {
 		data.ParentHref = *parentHref

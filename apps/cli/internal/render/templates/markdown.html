@@ -27,5 +27,6 @@
     {{if .Frontmatter}}<div class="frontmatter"><table>{{range .FrontmatterRows}}<tr><td class="fm-key">{{.Key}}</td><td>{{.Value}}</td></tr>
 {{end}}</table></div>
 {{end}}{{.BodyHTML}}
+    <footer style="margin-top:40px;padding-top:8px;border-top:1px solid #eee;font-size:0.75em;color:#999;">viewmd {{.Version}}</footer>
 </body>
 </html>

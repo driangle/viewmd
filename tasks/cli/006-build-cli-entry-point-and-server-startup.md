@@ -1,7 +1,7 @@
 ---
 id: "006"
 title: "Build CLI entry point and server startup"
-status: pending
+status: completed
 priority: high
 dependencies: ["005"]
 tags: ["go", "cli"]
@@ -16,12 +16,12 @@ Wire up `apps/cli/cmd/viewmd/main.go` as the CLI entry point that parses args, s
 
 ## Tasks
 
-- [ ] Parse optional port argument from `os.Args` (default 8000)
-- [ ] Bind HTTP server with the handler from task 005
-- [ ] Detect port-in-use and print a clear error
-- [ ] Print startup banner (version, URL, feature list) matching Python output
-- [ ] Handle SIGINT/SIGTERM for graceful shutdown
-- [ ] Define VERSION constant
+- [x] Parse optional port argument from `os.Args` (default 8000)
+- [x] Bind HTTP server with the handler from task 005
+- [x] Detect port-in-use and print a clear error
+- [x] Print startup banner (version, URL, feature list) matching Python output
+- [x] Handle SIGINT/SIGTERM for graceful shutdown
+- [x] Define VERSION constant
 
 ## Acceptance Criteria
 

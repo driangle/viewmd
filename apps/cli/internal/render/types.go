@@ -15,12 +15,14 @@ type markdownData struct {
 	Frontmatter     map[string]string
 	FrontmatterRows []FrontmatterRow
 	BodyHTML        template.HTML
+	Version         string
 }
 
 // textData holds template data for the text file page.
 type textData struct {
 	FileName string
 	Content  template.HTML
+	Version  string
 }
 
 // DirEntry represents a single item in a directory listing.
@@ -52,4 +54,5 @@ type directoryData struct {
 	HasParent   bool
 	ParentHref  string
 	Items       []DirEntry
+	Version     string
 }
