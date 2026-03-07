@@ -1,7 +1,7 @@
 ---
 id: "011"
 title: "Implement markdown serving with goldmark"
-status: pending
+status: completed
 priority: high
 tags: ["go", "http"]
 parent: "005"

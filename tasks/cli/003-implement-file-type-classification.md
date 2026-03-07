@@ -1,7 +1,7 @@
 ---
 id: "003"
 title: "Implement file type classification"
-status: pending
+status: completed
 priority: high
 dependencies: ["001"]
 tags: ["go", "core"]
