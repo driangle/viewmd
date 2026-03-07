@@ -11,7 +11,7 @@ import (
 func TestMarkdownPageWithFrontmatter(t *testing.T) {
 	var buf bytes.Buffer
 	fm := map[string]string{"title": "Hello", "author": "Alice"}
-	err := render.RenderMarkdownPage(&buf, "test.md", fm, "<p>Body</p>", "/")
+	err := render.RenderMarkdownPage(&buf, "test.md", fm, "<p>Body</p>", "/", "/")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -30,7 +30,7 @@ func TestMarkdownPageWithFrontmatter(t *testing.T) {
 
 func TestMarkdownPageWithoutFrontmatter(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderMarkdownPage(&buf, "test.md", nil, "<p>Body</p>", "/")
+	err := render.RenderMarkdownPage(&buf, "test.md", nil, "<p>Body</p>", "/", "/")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -46,7 +46,7 @@ func TestMarkdownPageWithoutFrontmatter(t *testing.T) {
 
 func TestMarkdownPageBaseHref(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderMarkdownPage(&buf, "doc.md", nil, "<p>hi</p>", "/docs/")
+	err := render.RenderMarkdownPage(&buf, "doc.md", nil, "<p>hi</p>", "/docs/", "/docs/")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -59,7 +59,7 @@ func TestMarkdownPageBaseHref(t *testing.T) {
 
 func TestMarkdownPageEscapesFileName(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderMarkdownPage(&buf, "<script>alert(1)</script>", nil, "<p>ok</p>", "/")
+	err := render.RenderMarkdownPage(&buf, "<script>alert(1)</script>", nil, "<p>ok</p>", "/", "/")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -76,7 +76,7 @@ func TestMarkdownPageEscapesFileName(t *testing.T) {
 func TestMarkdownPageEscapesFrontmatterValues(t *testing.T) {
 	var buf bytes.Buffer
 	fm := map[string]string{"key": "<b>bold</b>"}
-	err := render.RenderMarkdownPage(&buf, "test.md", fm, "<p>ok</p>", "/")
+	err := render.RenderMarkdownPage(&buf, "test.md", fm, "<p>ok</p>", "/", "/")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -92,7 +92,7 @@ func TestMarkdownPageEscapesFrontmatterValues(t *testing.T) {
 
 func TestTextPage(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderTextPage(&buf, "main.go", "package main\n")
+	err := render.RenderTextPage(&buf, "main.go", "package main\n", "/")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -108,7 +108,7 @@ func TestTextPage(t *testing.T) {
 
 func TestTextPageEscapesFileName(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderTextPage(&buf, "<img src=x>", "content")
+	err := render.RenderTextPage(&buf, "<img src=x>", "content", "/")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -143,6 +143,65 @@ func TestDirectoryPageWithParent(t *testing.T) {
 	}
 	if !strings.Contains(out, "<h1>Directory: /path</h1>") {
 		t.Error("expected display path in h1")
+	}
+}
+
+func TestMarkdownPageParentNav(t *testing.T) {
+	tests := []struct {
+		name       string
+		parentHref string
+		wantLink   string
+	}{
+		{"root file", "/", `<a href="/">..</a>`},
+		{"nested file", "/docs/", `<a href="/docs/">..</a>`},
+		{"deeply nested", "/a/b/", `<a href="/a/b/">..</a>`},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			err := render.RenderMarkdownPage(&buf, "f.md", nil, "<p>ok</p>", "/", tt.parentHref)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			out := buf.String()
+
+			if !strings.Contains(out, `class="parent-nav"`) {
+				t.Error("expected parent-nav class")
+			}
+			if !strings.Contains(out, tt.wantLink) {
+				t.Errorf("expected parent link %q in output", tt.wantLink)
+			}
+		})
+	}
+}
+
+func TestTextPageParentNav(t *testing.T) {
+	tests := []struct {
+		name       string
+		parentHref string
+		wantLink   string
+	}{
+		{"root file", "/", `<a href="/">..</a>`},
+		{"nested file", "/src/", `<a href="/src/">..</a>`},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			err := render.RenderTextPage(&buf, "main.go", "code", tt.parentHref)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			out := buf.String()
+
+			if !strings.Contains(out, `class="parent-nav"`) {
+				t.Error("expected parent-nav class")
+			}
+			if !strings.Contains(out, tt.wantLink) {
+				t.Errorf("expected parent link %q in output", tt.wantLink)
+			}
+		})
 	}
 }
 

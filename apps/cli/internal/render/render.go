@@ -21,7 +21,7 @@ var templates = template.Must(
 // RenderMarkdownPage writes a full HTML page for rendered markdown content.
 // frontmatter may be nil if no frontmatter was parsed.
 // bodyHTML is already-rendered HTML from the markdown converter.
-func RenderMarkdownPage(w io.Writer, fileName string, frontmatter map[string]string, bodyHTML string, baseURL string) error {
+func RenderMarkdownPage(w io.Writer, fileName string, frontmatter map[string]string, bodyHTML string, baseURL string, parentHref string) error {
 	var rows []FrontmatterRow
 	for k, v := range frontmatter {
 		rows = append(rows, FrontmatterRow{Key: k, Value: v})
@@ -30,6 +30,7 @@ func RenderMarkdownPage(w io.Writer, fileName string, frontmatter map[string]str
 	data := markdownData{
 		FileName:        fileName,
 		BaseURL:         baseURL,
+		ParentHref:      parentHref,
 		Frontmatter:     frontmatter,
 		FrontmatterRows: rows,
 		BodyHTML:        template.HTML(bodyHTML),
@@ -40,11 +41,12 @@ func RenderMarkdownPage(w io.Writer, fileName string, frontmatter map[string]str
 
 // RenderTextPage writes a full HTML page for a plain text file.
 // escapedContent should already be HTML-escaped.
-func RenderTextPage(w io.Writer, fileName string, escapedContent string) error {
+func RenderTextPage(w io.Writer, fileName string, escapedContent string, parentHref string) error {
 	data := textData{
-		FileName: fileName,
-		Content:  template.HTML(escapedContent),
-		Version:  Version,
+		FileName:   fileName,
+		ParentHref: parentHref,
+		Content:    template.HTML(escapedContent),
+		Version:    Version,
 	}
 	return templates.ExecuteTemplate(w, "text.html", data)
 }

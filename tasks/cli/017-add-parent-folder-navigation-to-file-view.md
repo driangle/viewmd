@@ -1,7 +1,7 @@
 ---
 title: "Add parent folder navigation to file view"
 id: "017"
-status: pending
+status: completed
 priority: low
 type: feature
 tags: ["ui", "navigation"]
@@ -16,11 +16,11 @@ Add lightweight navigation to the file view so users can easily navigate up to t
 
 ## Tasks
 
-- [ ] Add a "navigate up" link/element to the markdown file view template
-- [ ] Add the same link to the text file view template
-- [ ] Ensure the link resolves to the correct parent directory path
-- [ ] Style the link to be minimal and unobtrusive (top of page, small text)
-- [ ] Add tests for the parent navigation link in rendered output
+- [x] Add a "navigate up" link/element to the markdown file view template
+- [x] Add the same link to the text file view template
+- [x] Ensure the link resolves to the correct parent directory path
+- [x] Style the link to be minimal and unobtrusive (top of page, small text)
+- [x] Add tests for the parent navigation link in rendered output
 
 ## Acceptance Criteria
 

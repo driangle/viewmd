@@ -21,9 +21,13 @@
         .frontmatter table { width: auto; margin: 8px 0; border: none; }
         .frontmatter td { border: none; padding: 2px 12px 2px 0; }
         .frontmatter .fm-key { font-weight: 600; color: #444; }
+        .parent-nav { font-size: 0.85em; margin-bottom: 12px; }
+        .parent-nav a { color: #586069; }
+        .parent-nav a:hover { color: #0066cc; }
     </style>
 </head>
 <body>
+    <div class="parent-nav"><a href="{{.ParentHref}}">..</a></div>
     {{if .Frontmatter}}<div class="frontmatter"><table>{{range .FrontmatterRows}}<tr><td class="fm-key">{{.Key}}</td><td>{{.Value}}</td></tr>
 {{end}}</table></div>
 {{end}}{{.BodyHTML}}

@@ -43,6 +43,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	reqPath = strings.TrimPrefix(reqPath, "/")
+	reqPath = strings.TrimSuffix(reqPath, "/")
 
 	timestamp := time.Now().Format("15:04:05")
 	displayPath := reqPath
@@ -66,26 +67,39 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if info.IsDir() {
 		readme := filepath.Join(fullPath, "README.md")
 		if _, err := os.Stat(readme); err == nil {
-			markdown.ServeMarkdown(w, readme)
+			baseURL := "/" + reqPath + "/"
+			parentHref := parentHrefFromPath(reqPath)
+			markdown.ServeMarkdown(w, readme, baseURL, parentHref)
 			return
 		}
 		h.serveDirectoryListing(w, r, reqPath)
 		return
 	}
 
+	parentHref := parentHrefFromPath(reqPath)
 	ext := strings.ToLower(filepath.Ext(fullPath))
 	switch {
 	case ext == ".md" || ext == ".markdown":
-		markdown.ServeMarkdown(w, fullPath)
+		markdown.ServeMarkdown(w, fullPath, parentHref, parentHref)
 	case classify.IsTextFile(info.Name()):
-		serveTextFile(w, r, fullPath)
+		serveTextFile(w, r, fullPath, parentHref)
 	default:
 		http.ServeFile(w, r, fullPath)
 	}
 }
 
 // serveTextFile reads a file as UTF-8 text and renders it as an HTML page.
-func serveTextFile(w http.ResponseWriter, r *http.Request, filePath string) {
+// parentHrefFromPath returns the URL path to the parent directory listing.
+// For "foo/bar/baz.md" it returns "/foo/bar/", for "baz.md" it returns "/".
+func parentHrefFromPath(reqPath string) string {
+	dir := filepath.Dir(reqPath)
+	if dir == "." {
+		return "/"
+	}
+	return "/" + filepath.ToSlash(dir) + "/"
+}
+
+func serveTextFile(w http.ResponseWriter, r *http.Request, filePath string, parentHref string) {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error reading file: %v", err),
@@ -100,7 +114,7 @@ func serveTextFile(w http.ResponseWriter, r *http.Request, filePath string) {
 
 	escaped := html.EscapeString(string(content))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := render.RenderTextPage(w, filepath.Base(filePath), escaped); err != nil {
+	if err := render.RenderTextPage(w, filepath.Base(filePath), escaped, parentHref); err != nil {
 		http.Error(w, fmt.Sprintf("Error rendering page: %v", err),
 			http.StatusInternalServerError)
 	}

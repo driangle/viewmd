@@ -36,7 +36,8 @@ func Convert(markdown string) (string, error) {
 
 // ServeMarkdown reads a markdown file, parses frontmatter, converts the body
 // to HTML, and writes a full rendered page to w.
-func ServeMarkdown(w http.ResponseWriter, filePath string) {
+// baseURL is the URL directory path used for resolving relative links (e.g. "/docs/").
+func ServeMarkdown(w http.ResponseWriter, filePath string, baseURL string, parentHref string) {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error reading file: %v", err), http.StatusInternalServerError)
@@ -51,20 +52,8 @@ func ServeMarkdown(w http.ResponseWriter, filePath string) {
 		return
 	}
 
-	baseURL := computeBaseURL(filePath)
-
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := render.RenderMarkdownPage(w, filepath.Base(filePath), meta, bodyHTML, baseURL); err != nil {
+	if err := render.RenderMarkdownPage(w, filepath.Base(filePath), meta, bodyHTML, baseURL, parentHref); err != nil {
 		http.Error(w, fmt.Sprintf("Error rendering page: %v", err), http.StatusInternalServerError)
 	}
-}
-
-// computeBaseURL returns "/" when the file is in the current directory,
-// or "/dir/" for files in subdirectories.
-func computeBaseURL(filePath string) string {
-	dir := filepath.Dir(filePath)
-	if dir == "." {
-		return "/"
-	}
-	return "/" + filepath.ToSlash(dir) + "/"
 }

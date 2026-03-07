@@ -58,7 +58,7 @@ func TestServeMarkdown(t *testing.T) {
 	}
 
 	rec := httptest.NewRecorder()
-	ServeMarkdown(rec, mdFile)
+	ServeMarkdown(rec, mdFile, "/", "/")
 
 	if rec.Code != 200 {
 		t.Errorf("status = %d, want 200", rec.Code)
@@ -79,28 +79,10 @@ func TestServeMarkdown(t *testing.T) {
 
 func TestServeMarkdown_FileNotFound(t *testing.T) {
 	rec := httptest.NewRecorder()
-	ServeMarkdown(rec, "/nonexistent/path.md")
+	ServeMarkdown(rec, "/nonexistent/path.md", "/", "/")
 
 	if rec.Code != 500 {
 		t.Errorf("status = %d, want 500", rec.Code)
 	}
 }
 
-func TestComputeBaseURL(t *testing.T) {
-	tests := []struct {
-		path string
-		want string
-	}{
-		{"README.md", "/"},
-		{"docs/guide.md", "/docs/"},
-		{"a/b/c.md", "/a/b/"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.path, func(t *testing.T) {
-			if got := computeBaseURL(tt.path); got != tt.want {
-				t.Errorf("computeBaseURL(%q) = %q, want %q", tt.path, got, tt.want)
-			}
-		})
-	}
-}

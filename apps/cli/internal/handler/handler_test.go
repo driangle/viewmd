@@ -275,3 +275,66 @@ func TestURLEncodedPath(t *testing.T) {
 		t.Error("expected content from URL-encoded path")
 	}
 }
+
+func TestMarkdownFileHasParentNav(t *testing.T) {
+	h := handler.New(setupTestDir(t))
+	rec := request(h, "/doc.md")
+
+	body := rec.Body.String()
+	if !strings.Contains(body, `class="parent-nav"`) {
+		t.Error("markdown file should have parent-nav element")
+	}
+	if !strings.Contains(body, `<a href="/">..</a>`) {
+		t.Error("root markdown file should link to /")
+	}
+}
+
+func TestNestedMarkdownFileHasParentNav(t *testing.T) {
+	h := handler.New(setupTestDir(t))
+	rec := request(h, "/sub/page.md")
+
+	body := rec.Body.String()
+	if !strings.Contains(body, `<a href="/sub/">..</a>`) {
+		t.Error("nested file should link to parent directory /sub/")
+	}
+}
+
+func TestTextFileHasParentNav(t *testing.T) {
+	h := handler.New(setupTestDir(t))
+	rec := request(h, "/script.py")
+
+	body := rec.Body.String()
+	if !strings.Contains(body, `class="parent-nav"`) {
+		t.Error("text file should have parent-nav element")
+	}
+	if !strings.Contains(body, `<a href="/">..</a>`) {
+		t.Error("root text file should link to /")
+	}
+}
+
+func TestReadmeAutoServeHasParentNav(t *testing.T) {
+	h := handler.New(setupTestDir(t))
+	rec := request(h, "/docs")
+
+	body := rec.Body.String()
+	if !strings.Contains(body, `class="parent-nav"`) {
+		t.Error("README auto-serve should have parent-nav element")
+	}
+	if !strings.Contains(body, `<a href="/">..</a>`) {
+		t.Error("docs/ README should link to parent /")
+	}
+}
+
+func TestTrailingSlashDirectoryParentLink(t *testing.T) {
+	h := handler.New(setupTestDir(t))
+	rec := request(h, "/sub/")
+
+	body := rec.Body.String()
+	if !strings.Contains(body, `<a href="/" class="dir">..</a>`) {
+		t.Error("trailing-slash directory should have parent link to root, got: " + body)
+	}
+	// Hrefs should not have double slashes
+	if strings.Contains(body, "//") {
+		t.Error("directory listing should not contain double slashes in hrefs")
+	}
+}

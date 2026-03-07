@@ -12,6 +12,7 @@ type FrontmatterRow struct {
 type markdownData struct {
 	FileName        string
 	BaseURL         string
+	ParentHref      string
 	Frontmatter     map[string]string
 	FrontmatterRows []FrontmatterRow
 	BodyHTML        template.HTML
@@ -20,9 +21,10 @@ type markdownData struct {
 
 // textData holds template data for the text file page.
 type textData struct {
-	FileName string
-	Content  template.HTML
-	Version  string
+	FileName   string
+	ParentHref string
+	Content    template.HTML
+	Version    string
 }
 
 // DirEntry represents a single item in a directory listing.
