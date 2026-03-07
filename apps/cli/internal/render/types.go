@@ -49,6 +49,7 @@ func (e DirEntry) Label() string {
 // directoryData holds template data for the directory listing page.
 type directoryData struct {
 	DisplayPath string
+	HasParent   bool
 	ParentHref  string
 	Items       []DirEntry
 }

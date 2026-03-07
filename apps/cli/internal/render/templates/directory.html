@@ -15,7 +15,7 @@
 <body>
     <h1>Directory: /{{.DisplayPath}}</h1>
     <ul>
-{{if .ParentHref}}<li><a href="/{{.ParentHref}}" class="dir">..</a></li>
+{{if .HasParent}}<li><a href="/{{.ParentHref}}" class="dir">..</a></li>
 {{end}}{{range .Items}}<li><a href="/{{.Href}}" class="{{.CSSClass}}">{{.Label}}</a></li>
 {{end}}    </ul>
 </body>

@@ -47,15 +47,14 @@ func RenderTextPage(w io.Writer, fileName string, escapedContent string) error {
 // RenderDirectoryPage writes a full HTML page for a directory listing.
 // parentHref is nil for the root directory.
 func RenderDirectoryPage(w io.Writer, displayPath string, parentHref *string, items []DirEntry) error {
-	var parent string
-	if parentHref != nil {
-		parent = *parentHref
-	}
-
 	data := directoryData{
 		DisplayPath: displayPath,
-		ParentHref:  parent,
+		HasParent:   parentHref != nil,
+		ParentHref:  "",
 		Items:       items,
+	}
+	if parentHref != nil {
+		data.ParentHref = *parentHref
 	}
 	return templates.ExecuteTemplate(w, "directory.html", data)
 }

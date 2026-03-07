@@ -1,7 +1,7 @@
 ---
 id: "010"
 title: "Implement request routing and directory listing"
-status: pending
+status: completed
 priority: high
 tags: ["go", "http"]
 parent: "005"
@@ -17,16 +17,16 @@ Build the core HTTP handler in `apps/cli/internal/handler/` with the request rou
 
 ## Tasks
 
-- [ ] Create `Handler` struct that implements `http.Handler`
-- [ ] Implement URL decoding and path resolution from request URL
-- [ ] Route root path (`/`) to directory listing
-- [ ] Route directory paths: serve README.md if present, otherwise show listing
-- [ ] Dispatch `.md`/`.markdown` to markdown serving (stub initially)
-- [ ] Dispatch text files to text serving (stub initially)
-- [ ] Dispatch other files to `http.FileServer` passthrough
-- [ ] Return 404 for missing files
-- [ ] Add request logging: `[HH:MM:SS] Request: /path`
-- [ ] Implement directory listing: sorted entries (dirs first), parent link for subdirs
+- [x] Create `Handler` struct that implements `http.Handler`
+- [x] Implement URL decoding and path resolution from request URL
+- [x] Route root path (`/`) to directory listing
+- [x] Route directory paths: serve README.md if present, otherwise show listing
+- [x] Dispatch `.md`/`.markdown` to markdown serving (stub initially)
+- [x] Dispatch text files to text serving (stub initially)
+- [x] Dispatch other files to `http.FileServer` passthrough
+- [x] Return 404 for missing files
+- [x] Add request logging: `[HH:MM:SS] Request: /path`
+- [x] Implement directory listing: sorted entries (dirs first), parent link for subdirs
 
 ## Acceptance Criteria
 
