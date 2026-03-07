@@ -1,7 +1,7 @@
 ---
 id: "005"
 title: "Implement HTTP handler and routing"
-status: pending
+status: completed
 priority: high
 dependencies: ["002", "003", "004"]
 tags: ["go", "http"]
@@ -16,15 +16,15 @@ Implement the HTTP request handler in `apps/cli/internal/handler/` that routes r
 
 ## Tasks
 
-- [ ] Implement URL decoding and path resolution
-- [ ] Route root path to directory listing
-- [ ] Route directories with README.md to markdown rendering
-- [ ] Route directories without README.md to directory listing
-- [ ] Route `.md`/`.markdown` files to markdown rendering (with goldmark conversion using fenced_code, tables extensions)
-- [ ] Route text files to text rendering (with binary fallback on invalid UTF-8)
-- [ ] Route other files to `http.FileServer` passthrough
-- [ ] Return 404 for missing files
-- [ ] Add request logging with timestamp `[HH:MM:SS] Request: /path`
+- [x] Implement URL decoding and path resolution
+- [x] Route root path to directory listing
+- [x] Route directories with README.md to markdown rendering
+- [x] Route directories without README.md to directory listing
+- [x] Route `.md`/`.markdown` files to markdown rendering (with goldmark conversion using fenced_code, tables extensions)
+- [x] Route text files to text rendering (with binary fallback on invalid UTF-8)
+- [x] Route other files to `http.FileServer` passthrough
+- [x] Return 404 for missing files
+- [x] Add request logging with timestamp `[HH:MM:SS] Request: /path`
 
 ## Acceptance Criteria
 
