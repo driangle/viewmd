@@ -126,15 +126,18 @@ func TestRootListsFilesAndSubdirs(t *testing.T) {
 	}
 }
 
-func TestSubdirWithReadmeRendersMarkdown(t *testing.T) {
+func TestSubdirWithReadmeShowsListingByDefault(t *testing.T) {
 	srv := testutil.StartServer(t, map[string]string{
 		"docs/README.md": "# Docs\n",
 	})
 	defer srv.Close()
 
 	body := testutil.Get(t, srv.URL, "/docs")
-	if !strings.Contains(body, "<h1>Docs</h1>") {
-		t.Error("expected rendered <h1>Docs</h1> for subdir with README.md")
+	if !strings.Contains(body, "Directory:") {
+		t.Error("expected directory listing by default, not README content")
+	}
+	if !strings.Contains(body, "README.md") {
+		t.Error("expected README.md in directory listing")
 	}
 }
 

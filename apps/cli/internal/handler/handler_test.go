@@ -142,7 +142,7 @@ func TestDotfileServedAsText(t *testing.T) {
 	}
 }
 
-func TestDirectoryWithReadmeServesReadme(t *testing.T) {
+func TestDirectoryWithReadmeShowsListingByDefault(t *testing.T) {
 	h := handler.New(setupTestDir(t))
 	rec := request(h, "/docs")
 
@@ -150,8 +150,22 @@ func TestDirectoryWithReadmeServesReadme(t *testing.T) {
 		t.Fatalf("got status %d, want 200", rec.Code)
 	}
 	body := rec.Body.String()
+	if !strings.Contains(body, "Directory:") {
+		t.Error("expected directory listing by default, not README content")
+	}
+}
+
+func TestDirectoryWithReadmeAutoServeEnabled(t *testing.T) {
+	h := handler.New(setupTestDir(t))
+	h.AutoReadme = true
+	rec := request(h, "/docs")
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("got status %d, want 200", rec.Code)
+	}
+	body := rec.Body.String()
 	if !strings.Contains(body, "Docs Index") {
-		t.Error("expected README.md content for directory with README")
+		t.Error("expected README.md content when AutoReadme is enabled")
 	}
 }
 
@@ -314,6 +328,7 @@ func TestTextFileHasParentNav(t *testing.T) {
 
 func TestReadmeAutoServeHasParentNav(t *testing.T) {
 	h := handler.New(setupTestDir(t))
+	h.AutoReadme = true
 	rec := request(h, "/docs")
 
 	body := rec.Body.String()

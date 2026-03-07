@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"net"
 	"net/http"
@@ -20,16 +21,20 @@ const version = "0.1.0"
 func main() {
 	render.Version = version
 
-	if len(os.Args) > 1 && os.Args[1] == "--version" {
+	autoReadme := flag.Bool("auto-readme", false, "Auto-render README.md in directories")
+	ver := flag.Bool("version", false, "Print version and exit")
+	flag.Parse()
+
+	if *ver {
 		fmt.Println("viewmd", version)
 		return
 	}
 
 	port := 8000
-	if len(os.Args) > 1 {
-		p, err := strconv.Atoi(os.Args[1])
+	if flag.NArg() > 0 {
+		p, err := strconv.Atoi(flag.Arg(0))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: invalid port %q\n", os.Args[1])
+			fmt.Fprintf(os.Stderr, "Error: invalid port %q\n", flag.Arg(0))
 			os.Exit(1)
 		}
 		port = p
@@ -45,7 +50,9 @@ func main() {
 	printBanner(port)
 
 	root, _ := os.Getwd()
-	srv := &http.Server{Handler: handler.New(root)}
+	h := handler.New(root)
+	h.AutoReadme = *autoReadme
+	srv := &http.Server{Handler: h}
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)

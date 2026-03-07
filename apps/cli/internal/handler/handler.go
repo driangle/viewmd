@@ -21,7 +21,8 @@ import (
 // Handler serves markdown files, text files, and directory listings
 // from a root directory.
 type Handler struct {
-	root string
+	root       string
+	AutoReadme bool
 }
 
 // New creates a Handler that serves files from the given root directory.
@@ -65,12 +66,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if info.IsDir() {
-		readme := filepath.Join(fullPath, "README.md")
-		if _, err := os.Stat(readme); err == nil {
-			baseURL := "/" + reqPath + "/"
-			parentHref := parentHrefFromPath(reqPath)
-			markdown.ServeMarkdown(w, readme, baseURL, parentHref)
-			return
+		if h.AutoReadme {
+			readme := filepath.Join(fullPath, "README.md")
+			if _, err := os.Stat(readme); err == nil {
+				baseURL := "/" + reqPath + "/"
+				parentHref := parentHrefFromPath(reqPath)
+				markdown.ServeMarkdown(w, readme, baseURL, parentHref)
+				return
+			}
 		}
 		h.serveDirectoryListing(w, r, reqPath)
 		return

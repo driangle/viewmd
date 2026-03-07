@@ -1,7 +1,7 @@
 ---
 title: "Make README.md auto-render opt-in via CLI flag or config"
 id: "025"
-status: pending
+status: in-progress
 priority: medium
 type: feature
 tags: ["config", "navigation"]
