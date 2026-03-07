@@ -1,7 +1,7 @@
 ---
 id: "007"
 title: "Port integration tests to Go"
-status: pending
+status: completed
 priority: medium
 dependencies: ["006"]
 tags: ["go", "testing"]
