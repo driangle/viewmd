@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/driangle/viewmd/apps/cli/internal/classify"
 	"github.com/driangle/viewmd/apps/cli/internal/markdown"
@@ -77,18 +78,23 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case ext == ".md" || ext == ".markdown":
 		markdown.ServeMarkdown(w, fullPath)
 	case classify.IsTextFile(info.Name()):
-		serveTextFile(w, fullPath)
+		serveTextFile(w, r, fullPath)
 	default:
 		http.ServeFile(w, r, fullPath)
 	}
 }
 
 // serveTextFile reads a file as UTF-8 text and renders it as an HTML page.
-func serveTextFile(w http.ResponseWriter, filePath string) {
+func serveTextFile(w http.ResponseWriter, r *http.Request, filePath string) {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error reading file: %v", err),
 			http.StatusInternalServerError)
+		return
+	}
+
+	if !utf8.Valid(content) {
+		http.ServeFile(w, r, filePath)
 		return
 	}
 

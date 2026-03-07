@@ -1,6 +1,7 @@
 package handler_test
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -20,6 +21,7 @@ func setupTestDir(t *testing.T) string {
 	writeFile(t, dir, "doc.md", "---\ntitle: Test\n---\n# Doc")
 	writeFile(t, dir, "notes.markdown", "# Notes")
 	writeFile(t, dir, "script.py", "print('hello')")
+	writeFile(t, dir, "unsafe.txt", "<script>alert('xss')</script>")
 	writeFile(t, dir, ".gitignore", "*.o")
 
 	// Create a subdirectory with files
@@ -32,6 +34,7 @@ func setupTestDir(t *testing.T) string {
 
 	// Create a binary file
 	os.WriteFile(filepath.Join(dir, "image.png"), []byte{0x89, 0x50, 0x4E, 0x47}, 0o644)
+	os.WriteFile(filepath.Join(dir, "broken.txt"), []byte{0xff, 0xfe, 0xfd, 0x00, 0x01}, 0o644)
 
 	return dir
 }
@@ -102,6 +105,28 @@ func TestTextFileServed(t *testing.T) {
 	body := rec.Body.String()
 	if !strings.Contains(body, "print(") {
 		t.Error("expected text file content")
+	}
+	if !strings.Contains(body, `<div class="header">script.py</div>`) {
+		t.Error("expected filename shown in header")
+	}
+	if !strings.Contains(body, "<pre>") {
+		t.Error("expected content wrapped in pre block")
+	}
+}
+
+func TestTextFileContentEscaped(t *testing.T) {
+	h := handler.New(setupTestDir(t))
+	rec := request(h, "/unsafe.txt")
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("got status %d, want 200", rec.Code)
+	}
+	body := rec.Body.String()
+	if strings.Contains(body, "<script>alert('xss')</script>") {
+		t.Error("expected raw script tag to be escaped")
+	}
+	if !strings.Contains(body, "&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;") {
+		t.Error("expected escaped script tag in output")
 	}
 }
 
@@ -210,6 +235,29 @@ func TestBinaryFileServed(t *testing.T) {
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("got status %d, want 200", rec.Code)
+	}
+	if !strings.Contains(rec.Header().Get("Content-Type"), "image/png") {
+		t.Fatalf("got content-type %q, want image/png", rec.Header().Get("Content-Type"))
+	}
+}
+
+func TestInvalidUTF8TextFallsBackToBinaryServe(t *testing.T) {
+	h := handler.New(setupTestDir(t))
+	rec := request(h, "/broken.txt")
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("got status %d, want 200", rec.Code)
+	}
+	if strings.Contains(rec.Header().Get("Content-Type"), "text/html") {
+		t.Fatalf("got content-type %q, expected non-HTML fallback",
+			rec.Header().Get("Content-Type"))
+	}
+	if strings.Contains(rec.Body.String(), "<pre>") {
+		t.Fatal("expected binary fallback, not rendered HTML")
+	}
+	want := []byte{0xff, 0xfe, 0xfd, 0x00, 0x01}
+	if !bytes.Equal(rec.Body.Bytes(), want) {
+		t.Fatalf("got body %v, want %v", rec.Body.Bytes(), want)
 	}
 }
 

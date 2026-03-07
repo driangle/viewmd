@@ -1,7 +1,7 @@
 ---
 id: "012"
 title: "Implement text and static file serving"
-status: pending
+status: completed
 priority: high
 tags: ["go", "http"]
 parent: "005"
@@ -17,11 +17,11 @@ Implement the text file rendering path (HTML-escaped content in a pre block) and
 
 ## Tasks
 
-- [ ] Read text files and validate UTF-8 encoding
-- [ ] HTML-escape content and render using text page template
-- [ ] Fall back to binary serving (static file) when file contains invalid UTF-8
-- [ ] Serve unknown file types via `http.FileServer` passthrough (images, PDFs, etc.)
-- [ ] Handle errors with 500 responses
+- [x] Read text files and validate UTF-8 encoding
+- [x] HTML-escape content and render using text page template
+- [x] Fall back to binary serving (static file) when file contains invalid UTF-8
+- [x] Serve unknown file types via `http.FileServer` passthrough (images, PDFs, etc.)
+- [x] Handle errors with 500 responses
 
 ## Acceptance Criteria
 
