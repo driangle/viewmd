@@ -1,7 +1,7 @@
 ---
 id: "004"
 title: "Build HTML rendering templates"
-status: pending
+status: completed
 priority: high
 dependencies: ["001"]
 tags: ["go", "templates"]

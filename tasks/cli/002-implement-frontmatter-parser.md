@@ -1,7 +1,7 @@
 ---
 id: "002"
 title: "Implement frontmatter parser"
-status: pending
+status: completed
 priority: high
 dependencies: ["001"]
 tags: ["go", "core"]
