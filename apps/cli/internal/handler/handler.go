@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 	"unicode/utf8"
 
 	"github.com/driangle/viewmd/apps/cli/internal/classify"
@@ -47,13 +46,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reqPath = strings.TrimPrefix(reqPath, "/")
 	reqPath = strings.TrimSuffix(reqPath, "/")
 
-	timestamp := time.Now().Format("15:04:05")
-	displayPath := reqPath
-	if displayPath == "" {
-		displayPath = "/"
-	}
-	fmt.Printf("[%s] Request: %s\n", timestamp, displayPath)
-
 	if reqPath == "" {
 		h.serveDirectoryListing(w, r, ".")
 		return
@@ -72,7 +64,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if _, err := os.Stat(readme); err == nil {
 				baseURL := "/" + reqPath + "/"
 				parentHref := parentHrefFromPath(reqPath)
-				markdown.ServeMarkdown(w, readme, baseURL, parentHref)
+				breadcrumbs := render.BuildBreadcrumbs(reqPath + "/README.md")
+				markdown.ServeMarkdown(w, readme, baseURL, parentHref, breadcrumbs)
 				return
 			}
 		}
@@ -81,18 +74,18 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	parentHref := parentHrefFromPath(reqPath)
+	breadcrumbs := render.BuildBreadcrumbs(reqPath)
 	ext := strings.ToLower(filepath.Ext(fullPath))
 	switch {
 	case ext == ".md" || ext == ".markdown":
-		markdown.ServeMarkdown(w, fullPath, parentHref, parentHref)
+		markdown.ServeMarkdown(w, fullPath, parentHref, parentHref, breadcrumbs)
 	case classify.IsTextFile(info.Name()):
-		serveTextFile(w, r, fullPath, parentHref)
+		serveTextFile(w, r, fullPath, parentHref, breadcrumbs)
 	default:
 		http.ServeFile(w, r, fullPath)
 	}
 }
 
-// serveTextFile reads a file as UTF-8 text and renders it as an HTML page.
 // parentHrefFromPath returns the URL path to the parent directory listing.
 // For "foo/bar/baz.md" it returns "/foo/bar/", for "baz.md" it returns "/".
 func parentHrefFromPath(reqPath string) string {
@@ -103,7 +96,8 @@ func parentHrefFromPath(reqPath string) string {
 	return "/" + filepath.ToSlash(dir) + "/"
 }
 
-func serveTextFile(w http.ResponseWriter, r *http.Request, filePath string, parentHref string) {
+// serveTextFile reads a file as UTF-8 text and renders it as an HTML page.
+func serveTextFile(w http.ResponseWriter, r *http.Request, filePath string, parentHref string, breadcrumbs []render.BreadcrumbSegment) {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error reading file: %v", err),
@@ -119,7 +113,7 @@ func serveTextFile(w http.ResponseWriter, r *http.Request, filePath string, pare
 	raw := string(content)
 	escaped := html.EscapeString(raw)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := render.RenderTextPage(w, filepath.Base(filePath), escaped, parentHref, raw); err != nil {
+	if err := render.RenderTextPage(w, filepath.Base(filePath), escaped, parentHref, raw, breadcrumbs); err != nil {
 		http.Error(w, fmt.Sprintf("Error rendering page: %v", err),
 			http.StatusInternalServerError)
 	}

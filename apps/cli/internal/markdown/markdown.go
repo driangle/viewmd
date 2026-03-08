@@ -37,7 +37,7 @@ func Convert(markdown string) (string, error) {
 // ServeMarkdown reads a markdown file, parses frontmatter, converts the body
 // to HTML, and writes a full rendered page to w.
 // baseURL is the URL directory path used for resolving relative links (e.g. "/docs/").
-func ServeMarkdown(w http.ResponseWriter, filePath string, baseURL string, parentHref string) {
+func ServeMarkdown(w http.ResponseWriter, filePath string, baseURL string, parentHref string, breadcrumbs []render.BreadcrumbSegment) {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error reading file: %v", err), http.StatusInternalServerError)
@@ -53,7 +53,7 @@ func ServeMarkdown(w http.ResponseWriter, filePath string, baseURL string, paren
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := render.RenderMarkdownPage(w, filepath.Base(filePath), meta, bodyHTML, baseURL, parentHref, body); err != nil {
+	if err := render.RenderMarkdownPage(w, filepath.Base(filePath), meta, bodyHTML, baseURL, parentHref, body, breadcrumbs); err != nil {
 		http.Error(w, fmt.Sprintf("Error rendering page: %v", err), http.StatusInternalServerError)
 	}
 }

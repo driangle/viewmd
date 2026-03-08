@@ -16,6 +16,7 @@ import (
 	"syscall"
 
 	"github.com/driangle/viewmd/apps/cli/internal/handler"
+	"github.com/driangle/viewmd/apps/cli/internal/logging"
 	"github.com/driangle/viewmd/apps/cli/internal/render"
 )
 
@@ -52,13 +53,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	printBanner(port)
-
 	root, _ := os.Getwd()
+	printBanner(port, root)
+
 	h := handler.New(root)
 	h.AutoReadme = *autoReadme
 	h.ShowAll = *showAll || loadShowAllFromConfig(root)
-	srv := &http.Server{Handler: h}
+	srv := &http.Server{Handler: logging.Middleware(h)}
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
@@ -71,23 +72,13 @@ func main() {
 	}()
 
 	<-done
-	fmt.Println("\nShutting down...")
+	fmt.Fprintln(os.Stderr, "\nShutting down.")
 	srv.Shutdown(context.Background())
 }
 
-func printBanner(port int) {
-	sep := "============================================================"
-	fmt.Println(sep)
-	fmt.Printf("Markdown Server v%s\n", version)
-	fmt.Println(sep)
-	fmt.Printf("Server: http://localhost:%d\n", port)
-	fmt.Println("Features:")
-	fmt.Println("  - Markdown rendering (.md, .markdown)")
-	fmt.Println("  - Text file viewer (.py, .js, .gitignore, etc.)")
-	fmt.Println("  - Directory browsing")
-	fmt.Println(sep)
-	fmt.Println("Press Ctrl+C to stop")
-	fmt.Println()
+func printBanner(port int, root string) {
+	fmt.Fprintf(os.Stderr, "viewmd v%s\n", version)
+	fmt.Fprintf(os.Stderr, "Serving %s on http://localhost:%d\n\n", root, port)
 }
 
 // loadShowAllFromConfig reads .viewmd.yaml from root and returns

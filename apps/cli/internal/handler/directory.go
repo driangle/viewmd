@@ -57,8 +57,14 @@ func (h *Handler) serveDirectoryListing(w http.ResponseWriter, _ *http.Request, 
 		parentHref = &parent
 	}
 
+	bcPath := dirPath
+	if bcPath == "." {
+		bcPath = ""
+	}
+	breadcrumbs := render.BuildBreadcrumbs(bcPath)
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := render.RenderDirectoryPage(w, dirPath, parentHref, items); err != nil {
+	if err := render.RenderDirectoryPage(w, dirPath, parentHref, items, breadcrumbs); err != nil {
 		http.Error(w, fmt.Sprintf("Error rendering page: %v", err),
 			http.StatusInternalServerError)
 	}

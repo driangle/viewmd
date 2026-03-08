@@ -21,9 +21,11 @@
             --max-width: 860px;
         }
         body { max-width: var(--max-width); margin: 40px auto; padding: 0 20px; font-family: var(--font-sans); color: var(--color-text); }
-        .parent-nav { font-size: 0.85em; margin-bottom: 12px; }
-        .parent-nav a { color: var(--color-text-secondary); text-decoration: none; }
-        .parent-nav a:hover { color: var(--color-link); text-decoration: underline; }
+        .breadcrumb { font-size: 0.85em; margin-bottom: 12px; color: var(--color-text-secondary); }
+        .breadcrumb a { color: var(--color-text-secondary); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--color-link); text-decoration: underline; }
+        .breadcrumb .separator { margin: 0 4px; color: var(--color-border); }
+        .breadcrumb .current { color: var(--color-text); font-weight: 600; }
         .header { display: flex; justify-content: space-between; align-items: center; background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius) var(--radius) 0 0; padding: 10px 16px; font-weight: 600; font-size: 0.9em; }
         .content { background: var(--color-bg); border: 1px solid var(--color-border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); padding: 16px; overflow-x: auto; }
         pre { margin: 0; font-family: var(--font-mono); font-size: 13px; line-height: 1.5; white-space: pre; word-wrap: normal; color: var(--color-text); }
@@ -33,7 +35,7 @@
     </style>
 </head>
 <body>
-    <div class="parent-nav"><a href="{{.ParentHref}}">..</a></div>
+    <nav class="breadcrumb" data-parent-href="{{.ParentHref}}">{{range $i, $seg := .Breadcrumbs}}{{if $i}}<span class="separator">/</span>{{end}}{{if $seg.Href}}<a href="{{$seg.Href}}">{{$seg.Name}}</a>{{else}}<span class="current">{{$seg.Name}}</span>{{end}}{{end}}</nav>
     <div class="header"><span>{{.FileName}}</span><button class="copy-btn" onclick="copyRaw(this)">Copy</button></div>
     <div class="content"><pre>{{.Content}}</pre></div>
     <textarea id="raw-content" style="display:none;">{{.RawContent}}</textarea>
@@ -51,8 +53,9 @@
     document.addEventListener('keydown', function(e) {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
-            var nav = document.querySelector('.parent-nav a');
-            if (nav) { e.preventDefault(); window.location.href = nav.href; }
+            var bc = document.querySelector('.breadcrumb');
+            var href = bc ? bc.getAttribute('data-parent-href') : null;
+            if (href) { e.preventDefault(); window.location.href = href; }
         }
     });
     </script>

@@ -58,7 +58,7 @@ func TestServeMarkdown(t *testing.T) {
 	}
 
 	rec := httptest.NewRecorder()
-	ServeMarkdown(rec, mdFile, "/", "/")
+	ServeMarkdown(rec, mdFile, "/", "/", nil)
 
 	if rec.Code != 200 {
 		t.Errorf("status = %d, want 200", rec.Code)
@@ -79,7 +79,7 @@ func TestServeMarkdown(t *testing.T) {
 
 func TestServeMarkdown_FileNotFound(t *testing.T) {
 	rec := httptest.NewRecorder()
-	ServeMarkdown(rec, "/nonexistent/path.md", "/", "/")
+	ServeMarkdown(rec, "/nonexistent/path.md", "/", "/", nil)
 
 	if rec.Code != 500 {
 		t.Errorf("status = %d, want 500", rec.Code)

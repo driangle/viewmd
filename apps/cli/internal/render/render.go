@@ -21,7 +21,7 @@ var templates = template.Must(
 // RenderMarkdownPage writes a full HTML page for rendered markdown content.
 // frontmatter may be nil if no frontmatter was parsed.
 // bodyHTML is already-rendered HTML from the markdown converter.
-func RenderMarkdownPage(w io.Writer, fileName string, frontmatter map[string]string, bodyHTML string, baseURL string, parentHref string, rawContent string) error {
+func RenderMarkdownPage(w io.Writer, fileName string, frontmatter map[string]string, bodyHTML string, baseURL string, parentHref string, rawContent string, breadcrumbs []BreadcrumbSegment) error {
 	var rows []FrontmatterRow
 	for k, v := range frontmatter {
 		rows = append(rows, FrontmatterRow{Key: k, Value: v})
@@ -31,6 +31,7 @@ func RenderMarkdownPage(w io.Writer, fileName string, frontmatter map[string]str
 		FileName:        fileName,
 		BaseURL:         baseURL,
 		ParentHref:      parentHref,
+		Breadcrumbs:     breadcrumbs,
 		Frontmatter:     frontmatter,
 		FrontmatterRows: rows,
 		BodyHTML:        template.HTML(bodyHTML),
@@ -42,24 +43,26 @@ func RenderMarkdownPage(w io.Writer, fileName string, frontmatter map[string]str
 
 // RenderTextPage writes a full HTML page for a plain text file.
 // escapedContent should already be HTML-escaped.
-func RenderTextPage(w io.Writer, fileName string, escapedContent string, parentHref string, rawContent string) error {
+func RenderTextPage(w io.Writer, fileName string, escapedContent string, parentHref string, rawContent string, breadcrumbs []BreadcrumbSegment) error {
 	data := textData{
-		FileName:   fileName,
-		ParentHref: parentHref,
-		Content:    template.HTML(escapedContent),
-		RawContent: rawContent,
-		Version:    Version,
+		FileName:    fileName,
+		ParentHref:  parentHref,
+		Breadcrumbs: breadcrumbs,
+		Content:     template.HTML(escapedContent),
+		RawContent:  rawContent,
+		Version:     Version,
 	}
 	return templates.ExecuteTemplate(w, "text.html", data)
 }
 
 // RenderDirectoryPage writes a full HTML page for a directory listing.
 // parentHref is nil for the root directory.
-func RenderDirectoryPage(w io.Writer, displayPath string, parentHref *string, items []DirEntry) error {
+func RenderDirectoryPage(w io.Writer, displayPath string, parentHref *string, items []DirEntry, breadcrumbs []BreadcrumbSegment) error {
 	data := directoryData{
 		DisplayPath: displayPath,
 		HasParent:   parentHref != nil,
 		ParentHref:  "",
+		Breadcrumbs: breadcrumbs,
 		Items:       items,
 		Version:     Version,
 	}

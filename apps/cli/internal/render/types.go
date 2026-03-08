@@ -8,11 +8,18 @@ type FrontmatterRow struct {
 	Value string
 }
 
+// BreadcrumbSegment represents one clickable segment in a file path breadcrumb.
+type BreadcrumbSegment struct {
+	Name string
+	Href string
+}
+
 // markdownData holds template data for the markdown page.
 type markdownData struct {
 	FileName        string
 	BaseURL         string
 	ParentHref      string
+	Breadcrumbs     []BreadcrumbSegment
 	Frontmatter     map[string]string
 	FrontmatterRows []FrontmatterRow
 	BodyHTML        template.HTML
@@ -22,11 +29,12 @@ type markdownData struct {
 
 // textData holds template data for the text file page.
 type textData struct {
-	FileName   string
-	ParentHref string
-	Content    template.HTML
-	RawContent string
-	Version    string
+	FileName    string
+	ParentHref  string
+	Breadcrumbs []BreadcrumbSegment
+	Content     template.HTML
+	RawContent  string
+	Version     string
 }
 
 // DirEntry represents a single item in a directory listing.
@@ -57,6 +65,7 @@ type directoryData struct {
 	DisplayPath string
 	HasParent   bool
 	ParentHref  string
+	Breadcrumbs []BreadcrumbSegment
 	Items       []DirEntry
 	Version     string
 }

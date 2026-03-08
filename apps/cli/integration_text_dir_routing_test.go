@@ -162,7 +162,7 @@ func TestSubdirWithReadmeShowsListingByDefault(t *testing.T) {
 	defer srv.Close()
 
 	body := testutil.Get(t, srv.URL, "/docs")
-	if !strings.Contains(body, "Directory:") {
+	if !strings.Contains(body, "Directory listing") {
 		t.Error("expected directory listing by default, not README content")
 	}
 	if !strings.Contains(body, "README.md") {
@@ -182,15 +182,18 @@ func TestSubdirWithoutReadmeShowsListing(t *testing.T) {
 	}
 }
 
-func TestSubdirListingHasParentLink(t *testing.T) {
+func TestSubdirListingHasBreadcrumb(t *testing.T) {
 	srv := testutil.StartServer(t, nil)
 	defer srv.Close()
 
 	os.Mkdir(filepath.Join(srv.TempDir, "empty_dir"), 0o755)
 
 	body := testutil.Get(t, srv.URL, "/empty_dir")
-	if !strings.Contains(body, "..") {
-		t.Error("expected parent link (..) in subdirectory listing")
+	if !strings.Contains(body, `class="breadcrumb"`) {
+		t.Error("expected breadcrumb in subdirectory listing")
+	}
+	if !strings.Contains(body, `<a href="/">root</a>`) {
+		t.Error("expected root link in breadcrumb")
 	}
 }
 

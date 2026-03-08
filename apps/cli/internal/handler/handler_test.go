@@ -62,7 +62,7 @@ func TestRootServesDirectoryListing(t *testing.T) {
 		t.Fatalf("got status %d, want 200", rec.Code)
 	}
 	body := rec.Body.String()
-	if !strings.Contains(body, "Directory:") {
+	if !strings.Contains(body, "Directory listing") {
 		t.Error("expected directory listing page")
 	}
 }
@@ -150,7 +150,7 @@ func TestDirectoryWithReadmeShowsListingByDefault(t *testing.T) {
 		t.Fatalf("got status %d, want 200", rec.Code)
 	}
 	body := rec.Body.String()
-	if !strings.Contains(body, "Directory:") {
+	if !strings.Contains(body, "Directory listing") {
 		t.Error("expected directory listing by default, not README content")
 	}
 }
@@ -177,7 +177,7 @@ func TestDirectoryWithoutReadmeShowsListing(t *testing.T) {
 		t.Fatalf("got status %d, want 200", rec.Code)
 	}
 	body := rec.Body.String()
-	if !strings.Contains(body, "Directory:") {
+	if !strings.Contains(body, "Directory listing") {
 		t.Error("expected directory listing")
 	}
 	if !strings.Contains(body, "page.md") {
@@ -224,24 +224,30 @@ func TestDirectoryListingSortOrder(t *testing.T) {
 	}
 }
 
-func TestSubdirectoryListingHasParentLink(t *testing.T) {
+func TestSubdirectoryListingHasBreadcrumb(t *testing.T) {
 	h := handler.New(setupTestDir(t))
 	rec := request(h, "/sub")
 
 	body := rec.Body.String()
-	if !strings.Contains(body, "..") {
-		t.Error("subdirectory listing should have parent link")
+	if !strings.Contains(body, `class="breadcrumb"`) {
+		t.Error("subdirectory listing should have breadcrumb")
+	}
+	if !strings.Contains(body, `<a href="/">root</a>`) {
+		t.Error("subdirectory breadcrumb should have root link")
 	}
 }
 
-func TestRootListingNoParentLink(t *testing.T) {
+func TestRootListingBreadcrumbShowsOnlyRoot(t *testing.T) {
 	h := handler.New(setupTestDir(t))
 	rec := request(h, "/")
 
 	body := rec.Body.String()
-	// The parent link in the template is rendered as ".." with class="dir"
-	if strings.Contains(body, `class="dir">..</a>`) {
-		t.Error("root listing should not have parent link")
+	if !strings.Contains(body, `class="breadcrumb"`) {
+		t.Error("root listing should have breadcrumb")
+	}
+	// Root should show "root" as current (no link)
+	if !strings.Contains(body, `<span class="current">root</span>`) {
+		t.Error("root listing breadcrumb should show root as current")
 	}
 }
 
@@ -292,67 +298,63 @@ func TestURLEncodedPath(t *testing.T) {
 	}
 }
 
-func TestMarkdownFileHasParentNav(t *testing.T) {
+func TestMarkdownFileHasBreadcrumb(t *testing.T) {
 	h := handler.New(setupTestDir(t))
 	rec := request(h, "/doc.md")
 
 	body := rec.Body.String()
-	if !strings.Contains(body, `class="parent-nav"`) {
-		t.Error("markdown file should have parent-nav element")
+	if !strings.Contains(body, `class="breadcrumb"`) {
+		t.Error("markdown file should have breadcrumb element")
 	}
-	if !strings.Contains(body, `<a href="/">..</a>`) {
-		t.Error("root markdown file should link to /")
+	if !strings.Contains(body, `<a href="/">root</a>`) {
+		t.Error("breadcrumb should have root link")
 	}
 }
 
-func TestNestedMarkdownFileHasParentNav(t *testing.T) {
+func TestNestedMarkdownFileHasBreadcrumb(t *testing.T) {
 	h := handler.New(setupTestDir(t))
 	rec := request(h, "/sub/page.md")
 
 	body := rec.Body.String()
-	if !strings.Contains(body, `<a href="/sub/">..</a>`) {
-		t.Error("nested file should link to parent directory /sub/")
+	if !strings.Contains(body, `<a href="/sub/">sub</a>`) {
+		t.Error("nested file breadcrumb should have parent directory link")
 	}
 }
 
-func TestTextFileHasParentNav(t *testing.T) {
+func TestTextFileHasBreadcrumb(t *testing.T) {
 	h := handler.New(setupTestDir(t))
 	rec := request(h, "/script.py")
 
 	body := rec.Body.String()
-	if !strings.Contains(body, `class="parent-nav"`) {
-		t.Error("text file should have parent-nav element")
+	if !strings.Contains(body, `class="breadcrumb"`) {
+		t.Error("text file should have breadcrumb element")
 	}
-	if !strings.Contains(body, `<a href="/">..</a>`) {
-		t.Error("root text file should link to /")
+	if !strings.Contains(body, `<a href="/">root</a>`) {
+		t.Error("breadcrumb should have root link")
 	}
 }
 
-func TestReadmeAutoServeHasParentNav(t *testing.T) {
+func TestReadmeAutoServeHasBreadcrumb(t *testing.T) {
 	h := handler.New(setupTestDir(t))
 	h.AutoReadme = true
 	rec := request(h, "/docs")
 
 	body := rec.Body.String()
-	if !strings.Contains(body, `class="parent-nav"`) {
-		t.Error("README auto-serve should have parent-nav element")
+	if !strings.Contains(body, `class="breadcrumb"`) {
+		t.Error("README auto-serve should have breadcrumb element")
 	}
-	if !strings.Contains(body, `<a href="/">..</a>`) {
-		t.Error("docs/ README should link to parent /")
+	if !strings.Contains(body, `<a href="/">root</a>`) {
+		t.Error("breadcrumb should have root link")
 	}
 }
 
-func TestTrailingSlashDirectoryParentLink(t *testing.T) {
+func TestTrailingSlashDirectoryBreadcrumb(t *testing.T) {
 	h := handler.New(setupTestDir(t))
 	rec := request(h, "/sub/")
 
 	body := rec.Body.String()
-	if !strings.Contains(body, `<a href="/" class="dir" data-parent>..</a>`) {
-		t.Error("trailing-slash directory should have parent link to root, got: " + body)
-	}
-	// Hrefs should not have double slashes
-	if strings.Contains(body, "//") {
-		t.Error("directory listing should not contain double slashes in hrefs")
+	if !strings.Contains(body, `<a href="/">root</a>`) {
+		t.Error("trailing-slash directory breadcrumb should have root link")
 	}
 }
 

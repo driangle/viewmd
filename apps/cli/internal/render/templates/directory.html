@@ -28,19 +28,21 @@
         li a:hover { background: var(--color-bg-subtle); }
         li a.dir::before { content: '📁 '; }
         li a.file::before { content: '📄 '; }
-        li a[data-parent]::before { content: '⬆️ '; }
-        li:first-child:has(a[data-parent]) { margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px solid var(--color-border-light); }
         li.kb-active { background: var(--color-accent-bg); border-radius: var(--radius); }
         li.kb-active a { color: var(--color-accent-text); font-weight: 600; }
         .kb-hint { margin-top: 24px; font-size: 0.75em; color: var(--color-text-secondary); letter-spacing: 0.01em; }
+        .breadcrumb { font-size: 0.85em; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border-light); color: var(--color-text-secondary); }
+        .breadcrumb a { color: var(--color-text-secondary); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--color-link); text-decoration: underline; }
+        .breadcrumb .separator { margin: 0 4px; color: var(--color-border); }
+        .breadcrumb .current { color: var(--color-text); font-weight: 600; }
         footer { margin-top: 40px; padding-top: 8px; border-top: 1px solid var(--color-border-light); font-size: 0.75em; color: var(--color-text-secondary); }
     </style>
 </head>
 <body>
-    <h1>Directory: /{{.DisplayPath}}</h1>
+    <nav class="breadcrumb" data-parent-href="{{if .HasParent}}/{{.ParentHref}}{{else}}/{{end}}">{{range $i, $seg := .Breadcrumbs}}{{if $i}}<span class="separator">/</span>{{end}}{{if $seg.Href}}<a href="{{$seg.Href}}">{{$seg.Name}}</a>{{else}}<span class="current">{{$seg.Name}}</span>{{end}}{{end}}</nav>
     <ul id="file-list">
-{{if .HasParent}}<li><a href="/{{.ParentHref}}" class="dir" data-parent>..</a></li>
-{{end}}{{range .Items}}<li><a href="/{{.Href}}" class="{{.CSSClass}}">{{.Label}}</a></li>
+{{range .Items}}<li><a href="/{{.Href}}" class="{{.CSSClass}}">{{.Label}}</a></li>
 {{end}}    </ul>
     <div class="kb-hint">&#x2191;&#x2193; navigate &middot; Enter/&#x2192; open &middot; &#x2190; back</div>
     <footer>viewmd {{.Version}}</footer>
@@ -76,10 +78,11 @@
                     window.location.href = link.href;
                 }
             } else if ((e.key === 'ArrowLeft' || e.key === 'Backspace') && idx < 0) {
-                var parentLink = document.querySelector('#file-list li:first-child a[data-parent]');
-                if (parentLink) {
+                var bc = document.querySelector('.breadcrumb');
+                var href = bc ? bc.getAttribute('data-parent-href') : null;
+                if (href) {
                     e.preventDefault();
-                    window.location.href = parentLink.href;
+                    window.location.href = href;
                 }
             }
         });

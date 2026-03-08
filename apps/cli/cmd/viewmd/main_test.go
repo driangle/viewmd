@@ -12,26 +12,23 @@ import (
 )
 
 func TestPrintBanner(t *testing.T) {
-	old := os.Stdout
+	old := os.Stderr
 	r, w, _ := os.Pipe()
-	os.Stdout = w
+	os.Stderr = w
 
-	printBanner(8000)
+	printBanner(8000, "/tmp/test")
 
 	w.Close()
-	os.Stdout = old
+	os.Stderr = old
 
 	var buf bytes.Buffer
 	io.Copy(&buf, r)
 	output := buf.String()
 
 	checks := []string{
-		"Markdown Server v0.1.0",
+		"viewmd v0.1.0",
 		"http://localhost:8000",
-		"Markdown rendering",
-		"Text file viewer",
-		"Directory browsing",
-		"Ctrl+C",
+		"/tmp/test",
 	}
 	for _, s := range checks {
 		if !strings.Contains(output, s) {

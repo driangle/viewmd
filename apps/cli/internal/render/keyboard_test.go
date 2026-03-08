@@ -14,7 +14,7 @@ func TestDirectoryPageKeyboardNavJS(t *testing.T) {
 	items := []render.DirEntry{
 		{Name: "file.txt", Href: "file.txt", IsDir: false},
 	}
-	err := render.RenderDirectoryPage(&buf, "path", &parent, items)
+	err := render.RenderDirectoryPage(&buf, "path", &parent, items, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -46,7 +46,7 @@ func TestDirectoryPageKeyboardHint(t *testing.T) {
 	items := []render.DirEntry{
 		{Name: "file.txt", Href: "file.txt", IsDir: false},
 	}
-	err := render.RenderDirectoryPage(&buf, "", nil, items)
+	err := render.RenderDirectoryPage(&buf, "", nil, items, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -71,7 +71,7 @@ func TestDirectoryPageHighlightCSS(t *testing.T) {
 	items := []render.DirEntry{
 		{Name: "a.txt", Href: "a.txt", IsDir: false},
 	}
-	err := render.RenderDirectoryPage(&buf, "", nil, items)
+	err := render.RenderDirectoryPage(&buf, "", nil, items, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -82,24 +82,25 @@ func TestDirectoryPageHighlightCSS(t *testing.T) {
 	}
 }
 
-func TestDirectoryPageParentDataAttr(t *testing.T) {
+func TestDirectoryPageBreadcrumbParentHref(t *testing.T) {
 	var buf bytes.Buffer
 	parent := ""
 	items := []render.DirEntry{}
-	err := render.RenderDirectoryPage(&buf, "sub", &parent, items)
+	breadcrumbs := render.BuildBreadcrumbs("sub")
+	err := render.RenderDirectoryPage(&buf, "sub", &parent, items, breadcrumbs)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	out := buf.String()
 
-	if !strings.Contains(out, "data-parent") {
-		t.Error("expected data-parent attribute on parent link")
+	if !strings.Contains(out, "data-parent-href") {
+		t.Error("expected data-parent-href attribute on breadcrumb")
 	}
 }
 
 func TestMarkdownPageBackNavJS(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderMarkdownPage(&buf, "test.md", nil, "<p>hi</p>", "/", "/", "hi")
+	err := render.RenderMarkdownPage(&buf, "test.md", nil, "<p>hi</p>", "/", "/", "hi", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -114,14 +115,14 @@ func TestMarkdownPageBackNavJS(t *testing.T) {
 	if !strings.Contains(out, `e.key === 'Backspace'`) {
 		t.Error("expected Backspace handler on markdown page")
 	}
-	if !strings.Contains(out, `.parent-nav a`) {
-		t.Error("expected parent-nav selector in back-nav script")
+	if !strings.Contains(out, `.breadcrumb`) {
+		t.Error("expected breadcrumb selector in back-nav script")
 	}
 }
 
 func TestTextPageBackNavJS(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderTextPage(&buf, "main.go", "code", "/", "code")
+	err := render.RenderTextPage(&buf, "main.go", "code", "/", "code", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -136,7 +137,7 @@ func TestTextPageBackNavJS(t *testing.T) {
 	if !strings.Contains(out, `e.key === 'Backspace'`) {
 		t.Error("expected Backspace handler on text page")
 	}
-	if !strings.Contains(out, `.parent-nav a`) {
-		t.Error("expected parent-nav selector in back-nav script")
+	if !strings.Contains(out, `.breadcrumb`) {
+		t.Error("expected breadcrumb selector in back-nav script")
 	}
 }

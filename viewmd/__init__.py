@@ -3,6 +3,7 @@
 viewmd - Simple HTTP server for viewing Markdown files in your browser.
 Usage: viewmd [port]
 """
+import os
 import sys
 import html
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -21,6 +22,19 @@ except ImportError:
 
 from .render import (  # pylint: disable=wrong-import-position
     render_markdown_page, render_text_page, render_directory_page)
+
+_COLOR = (os.environ.get('NO_COLOR') is None
+          and os.environ.get('TERM', '') not in ('', 'dumb'))
+_RESET, _GREEN, _YELLOW, _RED = '\033[0m', '\033[32m', '\033[33m', '\033[31m'
+
+
+def _status_color(code):
+    """Return status code string, ANSI-colored when supported."""
+    s = str(code)
+    if not _COLOR:
+        return s
+    c = _RED if code >= 500 else (_YELLOW if code >= 400 else _GREEN)
+    return f"{c}{s}{_RESET}"
 
 
 def parse_frontmatter(content):
@@ -42,30 +56,37 @@ class MarkdownHandler(SimpleHTTPRequestHandler):
     """HTTP request handler that renders Markdown and text files."""
 
     TEXT_EXTENSIONS = {
-        '.txt', '.log', '.json', '.xml', '.yaml', '.yml',
-        '.toml', '.ini', '.cfg', '.conf', '.sh', '.bash',
-        '.zsh', '.fish', '.py', '.js', '.ts', '.jsx', '.tsx',
-        '.java', '.c', '.cpp', '.h', '.hpp', '.cs', '.go',
-        '.rs', '.rb', '.php', '.swift', '.kt', '.sql', '.html',
-        '.css', '.scss', '.sass', '.less', '.vue', '.svelte',
-        '.r', '.m', '.scala', '.pl', '.lua', '.vim', '.el',
-        '.clj', '.ex', '.exs', '.dockerfile', '.env',
-        '.gitignore', '.gitattributes', '.editorconfig',
-        '.eslintrc', '.prettierrc', '.babelrc',
+        '.txt', '.log', '.json', '.xml', '.yaml', '.yml', '.toml',
+        '.ini', '.cfg', '.conf', '.sh', '.bash', '.zsh', '.fish',
+        '.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.c', '.cpp',
+        '.h', '.hpp', '.cs', '.go', '.rs', '.rb', '.php', '.swift',
+        '.kt', '.sql', '.html', '.css', '.scss', '.sass', '.less',
+        '.vue', '.svelte', '.r', '.m', '.scala', '.pl', '.lua',
+        '.vim', '.el', '.clj', '.ex', '.exs', '.dockerfile', '.env',
+        '.gitignore', '.gitattributes', '.editorconfig', '.eslintrc',
+        '.prettierrc', '.babelrc',
     }
 
     TEXT_FILENAMES = {
-        'makefile', 'dockerfile', 'gemfile', 'rakefile',
-        'procfile', 'jenkinsfile', 'license', 'readme',
-        'changelog', 'authors', 'contributors', 'codeowners',
+        'makefile', 'dockerfile', 'gemfile', 'rakefile', 'procfile',
+        'jenkinsfile', 'license', 'readme', 'changelog', 'authors',
+        'contributors', 'codeowners',
     }
+
+    def log_request(self, code='-', size='-'):
+        """Log: HH:MM:SS METHOD /path STATUS."""
+        status = int(code) if isinstance(code, int) else 200
+        ts = datetime.now().strftime('%H:%M:%S')
+        print(f"{ts} {self.command} {self.path} {_status_color(status)}",
+              file=sys.stderr)
+
+    def log_message(self, format, *args):  # pylint: disable=redefined-builtin
+        """Suppress default verbose logging."""
 
     def do_GET(self):
         """Route requests to the appropriate handler."""
         parsed = urllib.parse.urlparse(self.path)
         path = urllib.parse.unquote(parsed.path.lstrip('/'))
-        timestamp = datetime.now().strftime('%H:%M:%S')
-        print(f"[{timestamp}] Request: {path or '/'}")
 
         if not path:
             self.serve_directory_listing()
@@ -166,20 +187,13 @@ def main():
     except OSError:
         print(f"Error: Port {port} is already in use.")
         sys.exit(1)
-    print("=" * 60)
-    print(f"Markdown Server v{VERSION}")
-    print("=" * 60)
-    print(f"Server: http://localhost:{port}")
-    print("Features:")
-    print("  - Markdown rendering (.md, .markdown)")
-    print("  - Text file viewer (.py, .js, .gitignore, etc.)")
-    print("  - Directory browsing")
-    print("=" * 60)
-    print("Press Ctrl+C to stop\n")
+    print(f"viewmd v{VERSION}", file=sys.stderr)
+    print(f"Serving {os.getcwd()} on http://localhost:{port}\n",
+          file=sys.stderr)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\nShutting down...")
+        print("\nShutting down.", file=sys.stderr)
         server.shutdown()
 
 
