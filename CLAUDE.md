@@ -55,6 +55,10 @@ Uses `github.com/yuin/goldmark` for Markdown rendering and stdlib for HTTP/templ
 - **Add unit tests for non-trivial logic.** Use table-driven tests. Focus on behavior and edge cases, not implementation details.
 - Go lint via `go vet`.
 
+## Documentation
+
+When adding a new feature or making a significant change to existing behavior, update the relevant docs (`README.md`, `docs/reference/cli.md`, `docs/getting-started/quick-start.md`, etc.). New CLI flags, changed defaults, and user-visible features should always be documented.
+
 ## Testing
 
 Tests live alongside source files (`*_test.go`). Use table-driven tests. Integration tests should use `net/http/httptest` or a real server on `:0` with temp directories for fixtures.

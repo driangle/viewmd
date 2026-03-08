@@ -18,6 +18,7 @@ viewmd [flags] [port]
 |------|-------|-------------|---------|
 | `--show-all` | `-a` | Show all files, not just markdown | `false` |
 | `--auto-readme` | | Auto-render README.md in directories | `false` |
+| `--watch` | `-w` | Watch for file changes and auto-reload browser | `false` |
 | `--version` | | Print version and exit | |
 
 ## Examples
@@ -34,6 +35,12 @@ viewmd -a
 
 # Show all files with auto-README on port 9000
 viewmd -a --auto-readme 9000
+
+# Watch for file changes and auto-reload the browser
+viewmd --watch
+
+# Combine watch with other flags
+viewmd -a -w --auto-readme
 ```
 
 ## Exit

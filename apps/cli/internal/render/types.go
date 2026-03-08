@@ -22,6 +22,7 @@ type markdownData struct {
 	BodyHTML        template.HTML
 	RawContent      string
 	Version         string
+	WatchMode       bool
 }
 
 // textData holds template data for the text file page.
@@ -33,6 +34,7 @@ type textData struct {
 	RawContent  string
 	Language    string
 	Version     string
+	WatchMode   bool
 }
 
 // DirEntry represents a single item in a directory listing.
@@ -66,6 +68,7 @@ type imageData struct {
 	ParentHref  string
 	Breadcrumbs []BreadcrumbSegment
 	Version     string
+	WatchMode   bool
 }
 
 // unsupportedData holds template data for the unsupported file page.
@@ -77,6 +80,7 @@ type unsupportedData struct {
 	ParentHref   string
 	Breadcrumbs  []BreadcrumbSegment
 	Version      string
+	WatchMode    bool
 }
 
 // directoryData holds template data for the directory listing page.
@@ -88,4 +92,5 @@ type directoryData struct {
 	Items       []DirEntry
 	EmptyReason string // "" = has items, "empty" = truly empty, "all_hidden" = all filtered by ignore rules
 	Version     string
+	WatchMode   bool
 }

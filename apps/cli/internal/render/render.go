@@ -14,6 +14,9 @@ import (
 // Version is set by the main package at startup.
 var Version string
 
+// WatchMode is set by the main package when --watch is enabled.
+var WatchMode bool
+
 //go:embed templates/*.html
 var templateFS embed.FS
 
@@ -34,6 +37,7 @@ func RenderMarkdownPage(w io.Writer, fileName string, meta []frontmatter.KeyValu
 		BodyHTML:        template.HTML(bodyHTML),
 		RawContent:      rawContent,
 		Version:         Version,
+		WatchMode:       WatchMode,
 	}
 	return templates.ExecuteTemplate(w, "markdown.html", data)
 }
@@ -50,6 +54,7 @@ func RenderTextPage(w io.Writer, fileName string, escapedContent string, parentH
 		RawContent:  rawContent,
 		Language:    language,
 		Version:     Version,
+		WatchMode:   WatchMode,
 	}
 	return templates.ExecuteTemplate(w, "text.html", data)
 }
@@ -64,6 +69,7 @@ func RenderUnsupportedPage(w io.Writer, fileName string, fileType string, fileSi
 		ParentHref:   parentHref,
 		Breadcrumbs:  breadcrumbs,
 		Version:      Version,
+		WatchMode:    WatchMode,
 	}
 	return templates.ExecuteTemplate(w, "unsupported.html", data)
 }
@@ -91,6 +97,7 @@ func RenderImagePage(w io.Writer, fileName string, fileSize int64, parentHref st
 		ParentHref:  parentHref,
 		Breadcrumbs: breadcrumbs,
 		Version:     Version,
+		WatchMode:   WatchMode,
 	}
 	return templates.ExecuteTemplate(w, "image.html", data)
 }
@@ -108,6 +115,7 @@ func RenderDirectoryPage(w io.Writer, displayPath string, parentHref *string, it
 		Items:       items,
 		EmptyReason: emptyReason,
 		Version:     Version,
+		WatchMode:   WatchMode,
 	}
 	if parentHref != nil {
 		data.ParentHref = *parentHref

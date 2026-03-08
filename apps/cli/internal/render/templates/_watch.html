@@ -1,0 +1,14 @@
+{{define "watch-script"}}
+<script>
+(function() {
+    var es = new EventSource('/-/events');
+    es.onmessage = function(e) {
+        if (e.data === 'reload') location.reload();
+    };
+    es.onerror = function() {
+        es.close();
+        setTimeout(function() { location.reload(); }, 2000);
+    };
+})();
+</script>
+{{end}}

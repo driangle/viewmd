@@ -20,6 +20,7 @@ Or from source: `go install github.com/driangle/viewmd/apps/cli/cmd/viewmd@lates
 viewmd          # Serves current directory on port 8000
 viewmd 3000     # Custom port
 viewmd -a       # Show all files, not just markdown
+viewmd -w       # Watch for changes, auto-reload browser
 ```
 
 ## Screenshots

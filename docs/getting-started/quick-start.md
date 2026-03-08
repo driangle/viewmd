@@ -32,10 +32,18 @@ Automatically render a directory's README.md when you navigate to it:
 viewmd --auto-readme
 ```
 
+## Watch Mode
+
+Auto-reload the browser when files change — useful for live editing:
+
+```bash
+viewmd --watch
+```
+
 ## Combine Flags
 
 ```bash
-viewmd -a --auto-readme 3000
+viewmd -a -w --auto-readme 3000
 ```
 
-This shows all files, auto-displays READMEs, and serves on port 3000.
+This shows all files, watches for changes, auto-displays READMEs, and serves on port 3000.

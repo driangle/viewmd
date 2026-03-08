@@ -18,6 +18,7 @@ import (
 	"github.com/driangle/viewmd/apps/cli/internal/handler"
 	"github.com/driangle/viewmd/apps/cli/internal/logging"
 	"github.com/driangle/viewmd/apps/cli/internal/render"
+	"github.com/driangle/viewmd/apps/cli/internal/watcher"
 )
 
 var version = "0.1.0"
@@ -28,6 +29,8 @@ func main() {
 	autoReadme := flag.Bool("auto-readme", false, "Auto-render README.md in directories")
 	showAll := flag.Bool("show-all", false, "Show all files, not just Markdown (shorthand: -a)")
 	flag.BoolVar(showAll, "a", false, "Show all files, not just Markdown")
+	watch := flag.Bool("watch", false, "Watch for file changes and auto-reload browser (shorthand: -w)")
+	flag.BoolVar(watch, "w", false, "Watch for file changes and auto-reload browser")
 	ignoreFlag := flag.String("ignore", "", "Comma-separated ignore patterns (glob syntax)")
 	ver := flag.Bool("version", false, "Print version and exit")
 	flag.Parse()
@@ -59,12 +62,25 @@ func main() {
 	ignorePatterns := buildIgnorePatterns(*ignoreFlag, root)
 
 	printBanner(port, root)
-	printArgs(port, *autoReadme, *showAll, ignorePatterns)
+	printArgs(port, *autoReadme, *showAll, *watch, ignorePatterns)
 
 	h := handler.New(root)
 	h.AutoReadme = *autoReadme
 	h.ShowAll = *showAll || loadShowAllFromConfig(root)
 	h.IgnorePatterns = ignorePatterns
+
+	if *watch {
+		w, err := watcher.New(root, ignorePatterns)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: failed to start watcher: %v\n", err)
+			os.Exit(1)
+		}
+		defer w.Close()
+		h.WatchMode = true
+		h.SetWatchEvents(w.Events())
+		render.WatchMode = true
+	}
+
 	srv := &http.Server{Handler: logging.Middleware(h)}
 
 	done := make(chan os.Signal, 1)
@@ -87,10 +103,11 @@ func printBanner(port int, root string) {
 	fmt.Fprintf(os.Stderr, "Serving %s on http://localhost:%d\n", root, port)
 }
 
-func printArgs(port int, autoReadme, showAll bool, ignorePatterns []string) {
+func printArgs(port int, autoReadme, showAll, watch bool, ignorePatterns []string) {
 	fmt.Fprintf(os.Stderr, "  port:        %d\n", port)
 	fmt.Fprintf(os.Stderr, "  auto-readme: %v\n", autoReadme)
 	fmt.Fprintf(os.Stderr, "  show-all:    %v\n", showAll)
+	fmt.Fprintf(os.Stderr, "  watch:       %v\n", watch)
 	if len(ignorePatterns) > 0 {
 		fmt.Fprintf(os.Stderr, "  ignore:      %s\n", strings.Join(ignorePatterns, ", "))
 	}

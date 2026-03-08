@@ -23,7 +23,9 @@ type Handler struct {
 	root           string
 	AutoReadme     bool
 	ShowAll        bool
+	WatchMode      bool
 	IgnorePatterns []string
+	watchEvents    <-chan struct{}
 }
 
 // New creates a Handler that serves files from the given root directory.
@@ -46,6 +48,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	reqPath = strings.TrimPrefix(reqPath, "/")
 	reqPath = strings.TrimSuffix(reqPath, "/")
+
+	if reqPath == "-/events" && h.WatchMode {
+		h.serveSSE(w, r)
+		return
+	}
 
 	if reqPath == "-/search" {
 		h.serveSearch(w, r)

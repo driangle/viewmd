@@ -1,7 +1,7 @@
 ---
 title: "Add a --watch flag to auto-refresh file changes in the web viewer"
 id: "034"
-status: pending
+status: in-progress
 priority: medium
 type: feature
 tags: []
