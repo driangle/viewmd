@@ -48,5 +48,14 @@
     }
     </script>
     <footer style="margin-top:40px;padding-top:8px;border-top:1px solid #eee;font-size:0.75em;color:#999;">viewmd {{.Version}}</footer>
+    <script>
+    document.addEventListener('keydown', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+            var nav = document.querySelector('.parent-nav a');
+            if (nav) { e.preventDefault(); window.location.href = nav.href; }
+        }
+    });
+    </script>
 </body>
 </html>

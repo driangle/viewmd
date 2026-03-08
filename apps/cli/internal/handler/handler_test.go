@@ -347,7 +347,7 @@ func TestTrailingSlashDirectoryParentLink(t *testing.T) {
 	rec := request(h, "/sub/")
 
 	body := rec.Body.String()
-	if !strings.Contains(body, `<a href="/" class="dir">..</a>`) {
+	if !strings.Contains(body, `<a href="/" class="dir" data-parent>..</a>`) {
 		t.Error("trailing-slash directory should have parent link to root, got: " + body)
 	}
 	// Hrefs should not have double slashes

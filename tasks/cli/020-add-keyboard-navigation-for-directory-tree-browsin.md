@@ -1,7 +1,7 @@
 ---
 title: "Add keyboard navigation for directory tree browsing"
 id: "020"
-status: pending
+status: completed
 priority: low
 type: feature
 tags: ["ui", "navigation"]
@@ -17,13 +17,13 @@ Add simple keyboard shortcuts to navigate the directory tree in the browser. Use
 
 ## Tasks
 
-- [ ] Add `keydown` event listener to directory listing pages for arrow key navigation (up/down to highlight items)
-- [ ] Implement Enter key to open the highlighted file or folder
-- [ ] Implement Backspace or left arrow to navigate up to the parent directory
-- [ ] Add visual highlight/focus indicator on the currently selected list item
-- [ ] On file view pages, support Backspace or left arrow to return to the parent directory listing
-- [ ] Add a small keyboard shortcut hint (e.g. "↑↓ navigate · Enter open · ← back") at the bottom of directory pages
-- [ ] Add tests for keyboard event handling
+- [x] Add `keydown` event listener to directory listing pages for arrow key navigation (up/down to highlight items)
+- [x] Implement Enter key to open the highlighted file or folder
+- [x] Implement Backspace or left arrow to navigate up to the parent directory
+- [x] Add visual highlight/focus indicator on the currently selected list item
+- [x] On file view pages, support Backspace or left arrow to return to the parent directory listing
+- [x] Add a small keyboard shortcut hint (e.g. "↑↓ navigate · Enter open · ← back") at the bottom of directory pages
+- [x] Add tests for keyboard event handling
 
 ## Acceptance Criteria
 

@@ -10,9 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-go@v5
         with:
-          python-version: "3.12"
-      - run: pip install -e ".[dev]"
-      - run: pylint viewmd/ tests/
-      - run: pytest
+          go-version-file: apps/cli/go.mod
+      - name: Vet
+        run: go vet ./...
+        working-directory: apps/cli
+      - name: Test
+        run: go test ./...
+        working-directory: apps/cli

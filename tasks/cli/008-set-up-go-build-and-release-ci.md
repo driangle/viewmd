@@ -1,7 +1,7 @@
 ---
 id: "008"
 title: "Set up Go build and release CI"
-status: pending
+status: completed
 priority: medium
 dependencies: ["007"]
 tags: ["go", "ci"]
@@ -17,10 +17,10 @@ Replace the Python PyPI publishing CI with Go build/test/release workflows using
 
 ## Tasks
 
-- [ ] Create GitHub Actions workflow for Go test/lint on push to main
-- [ ] Create release workflow that cross-compiles binaries (linux/darwin/windows × amd64/arm64)
-- [ ] Attach binaries to GitHub Releases
-- [ ] Remove or replace the existing PyPI publish workflow
+- [x] Create GitHub Actions workflow for Go test/lint on push to main
+- [x] Create release workflow that cross-compiles binaries (linux/darwin/windows × amd64/arm64)
+- [x] Attach binaries to GitHub Releases
+- [x] Remove or replace the existing PyPI publish workflow
 
 ## Acceptance Criteria
 

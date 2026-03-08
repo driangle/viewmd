@@ -132,7 +132,7 @@ func TestDirectoryPageWithParent(t *testing.T) {
 	}
 	out := buf.String()
 
-	if !strings.Contains(out, `<a href="/parent" class="dir">..</a>`) {
+	if !strings.Contains(out, `<a href="/parent" class="dir" data-parent>..</a>`) {
 		t.Error("expected parent link with dir class")
 	}
 	if !strings.Contains(out, `<a href="/path/subdir" class="dir">subdir/</a>`) {
