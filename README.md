@@ -26,15 +26,15 @@ viewmd -a       # Show all files, not just markdown
 
 **Markdown rendering** — `.md` files are rendered as styled HTML with full typography support.
 
-![Markdown rendering](docs/public/images/viewmd_md.png)
+![Markdown rendering](docs/public/images/viewmd_md.png?v=2)
 
 **Directory browsing** — Navigate your project with a clean file listing, keyboard shortcuts, and search.
 
-![Directory browsing](docs/public/images/viewmd_dir.png)
+![Directory browsing](docs/public/images/viewmd_dir.png?v=2)
 
 **Code and text files** — View any text file with syntax highlighting, copy support, and dark mode.
 
-![Code and text file viewing](docs/public/images/viewmd_license.png)
+![Code and text file viewing](docs/public/images/viewmd_license.png?v=2)
 
 ## What It Does
 
