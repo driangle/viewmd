@@ -4,42 +4,28 @@ A minimal file viewer for your browser. Point it at a directory and browse every
 
 **View everything, render what you can, manage nothing.**
 
-## Installation
+**[Documentation](https://driangle.github.io/viewmd/)**
 
-### Homebrew (macOS / Linux)
+## Installation
 
 ```bash
 brew install driangle/tap/viewmd
 ```
 
-### From source
-
-```bash
-go install github.com/driangle/viewmd/apps/cli/cmd/viewmd@latest
-```
-
-### Build locally
-
-```bash
-make build
-# Binary at apps/cli/bin/viewmd
-```
+Or from source: `go install github.com/driangle/viewmd/apps/cli/cmd/viewmd@latest`
 
 ## Quick Start
 
 ```bash
 viewmd          # Serves current directory on port 8000
 viewmd 3000     # Custom port
+viewmd -a       # Show all files, not just markdown
 ```
 
 ## What It Does
 
-- **Markdown files** (`.md`) — Rendered as HTML with nice styling
-- **Code/text files** — Syntax-highlighted display
+- **Markdown** — Rendered HTML with styled typography
+- **Code/text** — Syntax-highlighted display
 - **Images** — Inline rendering
-- **Directories** — File listing with README auto-display
+- **Directories** — File listing with keyboard navigation and search
 - **Other files** — Download or "can't preview" message
-
-## Python version
-
-The original Python version is archived in [`python/`](./python/) and available on [PyPI](https://pypi.org/project/viewmd/) (`pipx install viewmd`).
