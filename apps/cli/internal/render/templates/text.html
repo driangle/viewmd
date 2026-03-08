@@ -55,7 +55,14 @@
         if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
             var bc = document.querySelector('.breadcrumb');
             var href = bc ? bc.getAttribute('data-parent-href') : null;
-            if (href) { e.preventDefault(); window.location.href = href; }
+            if (href) {
+                e.preventDefault();
+                var path = window.location.pathname.replace(/\/+$/, '');
+                var name = path.split('/').pop() || '';
+                var u = new URL(href, window.location.origin);
+                u.searchParams.set('from', name);
+                window.location.href = u.toString();
+            }
         }
     });
     </script>

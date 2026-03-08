@@ -33,6 +33,9 @@ func TestDirectoryPageKeyboardNavJS(t *testing.T) {
 		{"ArrowLeft handler", `e.key === 'ArrowLeft'`},
 		{"Backspace handler", `e.key === 'Backspace'`},
 		{"kb-active class", `kb-active`},
+		{"from param check", `params.has('from')`},
+		{"kb param check", `params.has('kb')`},
+		{"addParam helper", `addParam(`},
 	}
 	for _, c := range checks {
 		if !strings.Contains(out, c.content) {
@@ -118,6 +121,9 @@ func TestMarkdownPageBackNavJS(t *testing.T) {
 	if !strings.Contains(out, `.breadcrumb`) {
 		t.Error("expected breadcrumb selector in back-nav script")
 	}
+	if !strings.Contains(out, `searchParams.set('from'`) {
+		t.Error("expected from param to be set on back navigation")
+	}
 }
 
 func TestTextPageBackNavJS(t *testing.T) {
@@ -139,5 +145,8 @@ func TestTextPageBackNavJS(t *testing.T) {
 	}
 	if !strings.Contains(out, `.breadcrumb`) {
 		t.Error("expected breadcrumb selector in back-nav script")
+	}
+	if !strings.Contains(out, `searchParams.set('from'`) {
+		t.Error("expected from param to be set on back navigation")
 	}
 }

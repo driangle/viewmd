@@ -51,6 +51,7 @@
         var items = document.querySelectorAll('#file-list li');
         if (!items.length) return;
         var idx = -1;
+        var params = new URLSearchParams(window.location.search);
         function highlight(newIdx) {
             if (idx >= 0 && idx < items.length) items[idx].classList.remove('kb-active');
             idx = newIdx;
@@ -58,6 +59,29 @@
                 items[idx].classList.add('kb-active');
                 items[idx].scrollIntoView({block: 'nearest'});
             }
+        }
+        function addParam(href, key, val) {
+            var u = new URL(href, window.location.origin);
+            u.searchParams.set(key, val);
+            return u.toString();
+        }
+        function currentDirName() {
+            var path = window.location.pathname.replace(/\/+$/, '');
+            var parts = path.split('/');
+            return parts[parts.length - 1] || '';
+        }
+        if (params.has('from')) {
+            var from = params.get('from');
+            for (var i = 0; i < items.length; i++) {
+                var a = items[i].querySelector('a');
+                if (a && a.textContent.replace(/\/$/, '') === from) {
+                    highlight(i);
+                    break;
+                }
+            }
+            if (idx < 0) highlight(0);
+        } else if (params.has('kb')) {
+            highlight(0);
         }
         document.addEventListener('keydown', function(e) {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -70,19 +94,19 @@
             } else if (e.key === 'Enter' && idx >= 0) {
                 e.preventDefault();
                 var link = items[idx].querySelector('a');
-                if (link) window.location.href = link.href;
+                if (link) window.location.href = addParam(link.href, 'kb', '1');
             } else if (e.key === 'ArrowRight' && idx >= 0) {
                 var link = items[idx].querySelector('a');
                 if (link && !link.hasAttribute('data-parent')) {
                     e.preventDefault();
-                    window.location.href = link.href;
+                    window.location.href = addParam(link.href, 'kb', '1');
                 }
-            } else if ((e.key === 'ArrowLeft' || e.key === 'Backspace') && idx < 0) {
+            } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
                 var bc = document.querySelector('.breadcrumb');
                 var href = bc ? bc.getAttribute('data-parent-href') : null;
                 if (href) {
                     e.preventDefault();
-                    window.location.href = href;
+                    window.location.href = addParam(href, 'from', currentDirName());
                 }
             }
         });

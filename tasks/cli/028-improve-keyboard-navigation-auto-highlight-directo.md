@@ -1,7 +1,7 @@
 ---
 title: "Improve keyboard navigation: auto-highlight directory on enter and back"
 id: "028"
-status: pending
+status: completed
 priority: medium
 type: feature
 tags: ["keyboard", "navigation"]
@@ -16,11 +16,11 @@ Improve keyboard navigation in the directory listing so that navigating between 
 
 ## Tasks
 
-- [ ] Pass the "came from" directory name via URL fragment or query param when navigating back (e.g., `?from=subdir`)
-- [ ] On directory page load, check for a `from` parameter and find the matching entry in `#file-list`
-- [ ] If a `from` match is found, auto-highlight that list item; otherwise, highlight the first item
-- [ ] When entering a directory (Enter/ArrowRight), highlight the first item on the new page
-- [ ] Ensure parent `..` link also passes `from` context when using ArrowLeft/Backspace navigation
+- [x] Pass the "came from" directory name via URL fragment or query param when navigating back (e.g., `?from=subdir`)
+- [x] On directory page load, check for a `from` parameter and find the matching entry in `#file-list`
+- [x] If a `from` match is found, auto-highlight that list item; otherwise, highlight the first item
+- [x] When entering a directory (Enter/ArrowRight), highlight the first item on the new page
+- [x] Ensure parent `..` link also passes `from` context when using ArrowLeft/Backspace navigation
 
 ## Acceptance Criteria
 
