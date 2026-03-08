@@ -124,7 +124,11 @@ jobs:
 
           # Push to homebrew-tap repo
           encoded=$(base64 -w 0 viewmd.rb)
-          existing_sha=$(gh api repos/driangle/homebrew-tap/contents/Formula/viewmd.rb --jq '.sha' 2>/dev/null || true)
+          existing_sha=$(gh api repos/driangle/homebrew-tap/contents/Formula/viewmd.rb --jq '.sha' 2>&1 || true)
+          # Clear if the API returned an error (file doesn't exist yet)
+          if [[ "$existing_sha" == *"Not Found"* ]] || [[ -z "$existing_sha" ]]; then
+            existing_sha=""
+          fi
 
           api_args=(
             repos/driangle/homebrew-tap/contents/Formula/viewmd.rb

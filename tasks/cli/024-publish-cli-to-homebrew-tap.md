@@ -23,7 +23,7 @@ Publish the Go CLI as a Homebrew formula in the existing tap at [driangle/homebr
 - [x] Formula should download the correct binary for the user's platform and architecture
 - [x] Include SHA256 checksums for each binary in the formula
 - [x] Add a CI step or script to auto-update the formula on new releases (update URL, version, SHA256)
-- [ ] Test `brew install driangle/tap/viewmd` and `brew upgrade` on macOS
+- [x] Test `brew install driangle/tap/viewmd` and `brew upgrade` on macOS
 - [x] Document installation via Homebrew in the project README
 
 ## Acceptance Criteria
