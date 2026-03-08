@@ -91,12 +91,23 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case ext == ".md" || ext == ".markdown":
 		markdown.ServeMarkdown(w, fullPath, parentHref, parentHref, breadcrumbs)
 	case classify.IsImageFile(info.Name()):
-		serveImageFile(w, info, parentHref, breadcrumbs)
+		if !prefersHTML(r) {
+			http.ServeFile(w, r, fullPath)
+		} else {
+			serveImageFile(w, info, parentHref, breadcrumbs)
+		}
 	case classify.IsTextFile(info.Name()):
 		serveTextFile(w, fullPath, parentHref, breadcrumbs)
 	default:
 		serveUnknownFile(w, fullPath, info, parentHref, breadcrumbs)
 	}
+}
+
+// prefersHTML reports whether the request Accept header indicates the client
+// wants an HTML response (e.g. browser navigation) rather than raw content
+// (e.g. an <img> tag fetching image data).
+func prefersHTML(r *http.Request) bool {
+	return strings.Contains(r.Header.Get("Accept"), "text/html")
 }
 
 // parentHrefFromPath returns the URL path to the parent directory listing.

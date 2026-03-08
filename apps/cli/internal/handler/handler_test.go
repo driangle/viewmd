@@ -53,6 +53,14 @@ func request(h http.Handler, path string) *httptest.ResponseRecorder {
 	return rec
 }
 
+func requestWithAccept(h http.Handler, path, accept string) *httptest.ResponseRecorder {
+	req := httptest.NewRequest("GET", path, nil)
+	req.Header.Set("Accept", accept)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec
+}
+
 func TestRootServesDirectoryListing(t *testing.T) {
 	h := handler.New(setupTestDir(t))
 	rec := request(h, "/")
@@ -275,7 +283,7 @@ func TestBinaryFileServesUnsupportedPage(t *testing.T) {
 
 func TestImageFileServesImagePage(t *testing.T) {
 	h := handler.New(setupTestDir(t))
-	rec := request(h, "/image.png")
+	rec := requestWithAccept(h, "/image.png", "text/html")
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("got status %d, want 200", rec.Code)
@@ -289,6 +297,18 @@ func TestImageFileServesImagePage(t *testing.T) {
 	}
 	if !strings.Contains(body, "?raw=1") {
 		t.Fatal("expected image src with ?raw=1")
+	}
+}
+
+func TestImageFileServesRawWhenNoHTMLAccept(t *testing.T) {
+	h := handler.New(setupTestDir(t))
+	rec := requestWithAccept(h, "/image.png", "image/webp,image/*,*/*;q=0.8")
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("got status %d, want 200", rec.Code)
+	}
+	if strings.Contains(rec.Header().Get("Content-Type"), "text/html") {
+		t.Fatal("expected raw image, not HTML page")
 	}
 }
 

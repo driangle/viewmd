@@ -4,6 +4,8 @@ viewmd renders different file types in different ways, always optimizing for rea
 
 ## Markdown
 
+![Markdown rendering](/images/viewmd_md.png)
+
 Markdown files (`.md`, `.markdown`) are rendered as full HTML with:
 
 - Styled typography and headings
@@ -31,6 +33,8 @@ Content here...
 The frontmatter is parsed as simple key-value pairs and shown in a highlighted box.
 
 ## Code & Text Files
+
+![Text file viewing](/images/viewmd_license.png)
 
 Text files are displayed with syntax highlighting in a monospace font. viewmd recognizes dozens of file extensions and special filenames — see [Supported File Types](/reference/file-types) for the full list.
 

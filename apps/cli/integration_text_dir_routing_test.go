@@ -237,7 +237,12 @@ func TestImageFileServesImagePageIntegration(t *testing.T) {
 
 	os.WriteFile(filepath.Join(srv.TempDir, "image.png"), pngHeader, 0o644)
 
-	resp := testutil.GetResponse(t, srv.URL, "/image.png")
+	req, _ := http.NewRequest("GET", srv.URL+"/image.png", nil)
+	req.Header.Set("Accept", "text/html")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("GET /image.png: %v", err)
+	}
 	defer resp.Body.Close()
 
 	data, err := io.ReadAll(resp.Body)

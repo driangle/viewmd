@@ -4,6 +4,8 @@ viewmd provides a clean, navigable file listing for directories.
 
 ## File Listing
 
+![Directory listing](/images/viewmd_dir.png)
+
 When you open a directory, viewmd shows its contents with:
 
 - Directories listed first (alphabetically), then files
