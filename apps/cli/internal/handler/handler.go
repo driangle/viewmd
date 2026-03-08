@@ -158,8 +158,9 @@ func serveTextFile(w http.ResponseWriter, filePath string, parentHref string, br
 
 	raw := string(content)
 	escaped := html.EscapeString(raw)
+	lang := classify.DetectLanguage(filepath.Base(filePath))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := render.RenderTextPage(w, filepath.Base(filePath), escaped, parentHref, raw, breadcrumbs); err != nil {
+	if err := render.RenderTextPage(w, filepath.Base(filePath), escaped, parentHref, raw, lang, breadcrumbs); err != nil {
 		http.Error(w, fmt.Sprintf("Error rendering page: %v", err),
 			http.StatusInternalServerError)
 	}

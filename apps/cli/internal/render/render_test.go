@@ -92,7 +92,7 @@ func TestMarkdownPageEscapesFrontmatterValues(t *testing.T) {
 
 func TestTextPage(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderTextPage(&buf, "main.go", "package main\n", "/", "package main\n", nil)
+	err := render.RenderTextPage(&buf, "main.go", "package main\n", "/", "package main\n", "go", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -101,14 +101,14 @@ func TestTextPage(t *testing.T) {
 	if !strings.Contains(out, `<span>main.go</span>`) {
 		t.Error("expected file name in header span")
 	}
-	if !strings.Contains(out, "<pre>package main\n</pre>") {
-		t.Error("expected content in pre block")
+	if !strings.Contains(out, `<code class="language-go">package main`) {
+		t.Error("expected content in code block with language class")
 	}
 }
 
 func TestTextPageEscapesFileName(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderTextPage(&buf, "<img src=x>", "content", "/", "content", nil)
+	err := render.RenderTextPage(&buf, "<img src=x>", "content", "/", "content", "", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -170,7 +170,7 @@ func TestMarkdownPageBreadcrumb(t *testing.T) {
 func TestTextPageBreadcrumb(t *testing.T) {
 	var buf bytes.Buffer
 	breadcrumbs := render.BuildBreadcrumbs("src/main.go")
-	err := render.RenderTextPage(&buf, "main.go", "code", "/src/", "code", breadcrumbs)
+	err := render.RenderTextPage(&buf, "main.go", "code", "/src/", "code", "go", breadcrumbs)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

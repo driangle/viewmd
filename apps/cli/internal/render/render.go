@@ -44,13 +44,15 @@ func RenderMarkdownPage(w io.Writer, fileName string, frontmatter map[string]str
 
 // RenderTextPage writes a full HTML page for a plain text file.
 // escapedContent should already be HTML-escaped.
-func RenderTextPage(w io.Writer, fileName string, escapedContent string, parentHref string, rawContent string, breadcrumbs []BreadcrumbSegment) error {
+// language is the highlight.js language identifier (empty for no highlighting).
+func RenderTextPage(w io.Writer, fileName string, escapedContent string, parentHref string, rawContent string, language string, breadcrumbs []BreadcrumbSegment) error {
 	data := textData{
 		FileName:    fileName,
 		ParentHref:  parentHref,
 		Breadcrumbs: breadcrumbs,
 		Content:     template.HTML(escapedContent),
 		RawContent:  rawContent,
+		Language:    language,
 		Version:     Version,
 	}
 	return templates.ExecuteTemplate(w, "text.html", data)

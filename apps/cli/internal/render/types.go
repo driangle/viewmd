@@ -34,6 +34,7 @@ type textData struct {
 	Breadcrumbs []BreadcrumbSegment
 	Content     template.HTML
 	RawContent  string
+	Language    string
 	Version     string
 }
 

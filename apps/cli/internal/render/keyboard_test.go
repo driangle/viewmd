@@ -128,7 +128,7 @@ func TestMarkdownPageBackNavJS(t *testing.T) {
 
 func TestTextPageBackNavJS(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderTextPage(&buf, "main.go", "code", "/", "code", nil)
+	err := render.RenderTextPage(&buf, "main.go", "code", "/", "code", "go", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
