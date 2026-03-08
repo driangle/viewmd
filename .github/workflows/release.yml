@@ -123,15 +123,18 @@ jobs:
           sed -i 's/^          //' viewmd.rb
 
           # Push to homebrew-tap repo
-          gh api repos/driangle/homebrew-tap/contents/Formula/viewmd.rb \
-            --method PUT \
-            --field message="Update viewmd to ${ver}" \
-            --field content="$(base64 -w 0 viewmd.rb)" \
-            --field branch=main \
-            $(
-              # Include SHA if file already exists (update vs create)
-              existing_sha=$(gh api repos/driangle/homebrew-tap/contents/Formula/viewmd.rb --jq '.sha' 2>/dev/null || true)
-              if [ -n "$existing_sha" ]; then
-                echo "--field sha=${existing_sha}"
-              fi
-            )
+          encoded=$(base64 -w 0 viewmd.rb)
+          existing_sha=$(gh api repos/driangle/homebrew-tap/contents/Formula/viewmd.rb --jq '.sha' 2>/dev/null || true)
+
+          api_args=(
+            repos/driangle/homebrew-tap/contents/Formula/viewmd.rb
+            --method PUT
+            --field "message=Update viewmd to ${ver}"
+            --field "content=${encoded}"
+            --field branch=main
+          )
+          if [ -n "$existing_sha" ]; then
+            api_args+=(--field "sha=${existing_sha}")
+          fi
+
+          gh api "${api_args[@]}"
