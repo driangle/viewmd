@@ -1,7 +1,7 @@
 ---
 title: "Add inline image viewing"
 id: "032"
-status: pending
+status: in-progress
 priority: medium
 type: feature
 tags: ["feature"]

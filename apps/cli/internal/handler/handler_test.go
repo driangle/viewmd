@@ -224,35 +224,39 @@ func TestDirectoryListingSortOrder(t *testing.T) {
 }
 
 func TestSubdirectoryListingHasBreadcrumb(t *testing.T) {
-	h := handler.New(setupTestDir(t))
+	root := setupTestDir(t)
+	h := handler.New(root)
 	rec := request(h, "/sub")
 
 	body := rec.Body.String()
 	if !strings.Contains(body, `class="breadcrumb"`) {
 		t.Error("subdirectory listing should have breadcrumb")
 	}
-	if !strings.Contains(body, `<a href="/">root</a>`) {
+	if !strings.Contains(body, `<a href="/">`+root+`</a>`) {
 		t.Error("subdirectory breadcrumb should have root link")
 	}
 }
 
 func TestRootListingBreadcrumbShowsOnlyRoot(t *testing.T) {
-	h := handler.New(setupTestDir(t))
+	root := setupTestDir(t)
+	h := handler.New(root)
 	rec := request(h, "/")
 
 	body := rec.Body.String()
 	if !strings.Contains(body, `class="breadcrumb"`) {
 		t.Error("root listing should have breadcrumb")
 	}
-	// Root should show "root" as current (no link)
-	if !strings.Contains(body, `<span class="current">root</span>`) {
+	if !strings.Contains(body, `<span class="current">`+root+`</span>`) {
 		t.Error("root listing breadcrumb should show root as current")
 	}
 }
 
 func TestBinaryFileServesUnsupportedPage(t *testing.T) {
-	h := handler.New(setupTestDir(t))
-	rec := request(h, "/image.png")
+	dir := t.TempDir()
+	os.WriteFile(filepath.Join(dir, "data.bin"), []byte{0xff, 0xfe, 0xfd}, 0o644)
+
+	h := handler.New(dir)
+	rec := request(h, "/data.bin")
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("got status %d, want 200", rec.Code)
@@ -266,6 +270,37 @@ func TestBinaryFileServesUnsupportedPage(t *testing.T) {
 	}
 	if !strings.Contains(body, "?raw=1") {
 		t.Fatal("expected download link with ?raw=1")
+	}
+}
+
+func TestImageFileServesImagePage(t *testing.T) {
+	h := handler.New(setupTestDir(t))
+	rec := request(h, "/image.png")
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("got status %d, want 200", rec.Code)
+	}
+	if !strings.Contains(rec.Header().Get("Content-Type"), "text/html") {
+		t.Fatalf("got content-type %q, want text/html", rec.Header().Get("Content-Type"))
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "<img") {
+		t.Fatal("expected image page with <img tag")
+	}
+	if !strings.Contains(body, "?raw=1") {
+		t.Fatal("expected image src with ?raw=1")
+	}
+}
+
+func TestImageFileRawServesBytes(t *testing.T) {
+	h := handler.New(setupTestDir(t))
+	rec := request(h, "/image.png?raw=1")
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("got status %d, want 200", rec.Code)
+	}
+	if strings.Contains(rec.Header().Get("Content-Type"), "text/html") {
+		t.Fatal("raw=1 should not serve HTML")
 	}
 }
 
@@ -313,14 +348,15 @@ func TestURLEncodedPath(t *testing.T) {
 }
 
 func TestMarkdownFileHasBreadcrumb(t *testing.T) {
-	h := handler.New(setupTestDir(t))
+	root := setupTestDir(t)
+	h := handler.New(root)
 	rec := request(h, "/doc.md")
 
 	body := rec.Body.String()
 	if !strings.Contains(body, `class="breadcrumb"`) {
 		t.Error("markdown file should have breadcrumb element")
 	}
-	if !strings.Contains(body, `<a href="/">root</a>`) {
+	if !strings.Contains(body, `<a href="/">`+root+`</a>`) {
 		t.Error("breadcrumb should have root link")
 	}
 }
@@ -336,20 +372,22 @@ func TestNestedMarkdownFileHasBreadcrumb(t *testing.T) {
 }
 
 func TestTextFileHasBreadcrumb(t *testing.T) {
-	h := handler.New(setupTestDir(t))
+	root := setupTestDir(t)
+	h := handler.New(root)
 	rec := request(h, "/script.py")
 
 	body := rec.Body.String()
 	if !strings.Contains(body, `class="breadcrumb"`) {
 		t.Error("text file should have breadcrumb element")
 	}
-	if !strings.Contains(body, `<a href="/">root</a>`) {
+	if !strings.Contains(body, `<a href="/">`+root+`</a>`) {
 		t.Error("breadcrumb should have root link")
 	}
 }
 
 func TestReadmeAutoServeHasBreadcrumb(t *testing.T) {
-	h := handler.New(setupTestDir(t))
+	root := setupTestDir(t)
+	h := handler.New(root)
 	h.AutoReadme = true
 	rec := request(h, "/docs")
 
@@ -357,17 +395,18 @@ func TestReadmeAutoServeHasBreadcrumb(t *testing.T) {
 	if !strings.Contains(body, `class="breadcrumb"`) {
 		t.Error("README auto-serve should have breadcrumb element")
 	}
-	if !strings.Contains(body, `<a href="/">root</a>`) {
+	if !strings.Contains(body, `<a href="/">`+root+`</a>`) {
 		t.Error("breadcrumb should have root link")
 	}
 }
 
 func TestTrailingSlashDirectoryBreadcrumb(t *testing.T) {
-	h := handler.New(setupTestDir(t))
+	root := setupTestDir(t)
+	h := handler.New(root)
 	rec := request(h, "/sub/")
 
 	body := rec.Body.String()
-	if !strings.Contains(body, `<a href="/">root</a>`) {
+	if !strings.Contains(body, `<a href="/">`+root+`</a>`) {
 		t.Error("trailing-slash directory breadcrumb should have root link")
 	}
 }

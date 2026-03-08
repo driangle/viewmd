@@ -70,7 +70,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if _, err := os.Stat(readme); err == nil {
 				baseURL := "/" + reqPath + "/"
 				parentHref := parentHrefFromPath(reqPath)
-				breadcrumbs := render.BuildBreadcrumbs(reqPath + "/README.md")
+				breadcrumbs := render.BuildBreadcrumbs(reqPath+"/README.md", h.root)
 				markdown.ServeMarkdown(w, readme, baseURL, parentHref, breadcrumbs)
 				return
 			}
@@ -85,11 +85,13 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	parentHref := parentHrefFromPath(reqPath)
-	breadcrumbs := render.BuildBreadcrumbs(reqPath)
+	breadcrumbs := render.BuildBreadcrumbs(reqPath, h.root)
 	ext := strings.ToLower(filepath.Ext(fullPath))
 	switch {
 	case ext == ".md" || ext == ".markdown":
 		markdown.ServeMarkdown(w, fullPath, parentHref, parentHref, breadcrumbs)
+	case classify.IsImageFile(info.Name()):
+		serveImageFile(w, info, parentHref, breadcrumbs)
 	case classify.IsTextFile(info.Name()):
 		serveTextFile(w, fullPath, parentHref, breadcrumbs)
 	default:
@@ -105,6 +107,14 @@ func parentHrefFromPath(reqPath string) string {
 		return "/"
 	}
 	return "/" + filepath.ToSlash(dir) + "/"
+}
+
+// serveImageFile renders the image viewer page.
+func serveImageFile(w http.ResponseWriter, info os.FileInfo, parentHref string, breadcrumbs []render.BreadcrumbSegment) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := render.RenderImagePage(w, info.Name(), info.Size(), parentHref, breadcrumbs); err != nil {
+		http.Error(w, fmt.Sprintf("Error rendering page: %v", err), http.StatusInternalServerError)
+	}
 }
 
 // serveUnknownFile handles files with unrecognized extensions by probing the

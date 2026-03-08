@@ -58,6 +58,16 @@ func (e DirEntry) Label() string {
 	return e.Name
 }
 
+// imageData holds template data for the image viewer page.
+type imageData struct {
+	FileName    string
+	ImageSrc    string
+	FileSize    string
+	ParentHref  string
+	Breadcrumbs []BreadcrumbSegment
+	Version     string
+}
+
 // unsupportedData holds template data for the unsupported file page.
 type unsupportedData struct {
 	FileName     string
@@ -76,5 +86,6 @@ type directoryData struct {
 	ParentHref  string
 	Breadcrumbs []BreadcrumbSegment
 	Items       []DirEntry
+	EmptyReason string // "" = has items, "empty" = truly empty, "all_hidden" = all filtered by ignore rules
 	Version     string
 }

@@ -127,8 +127,8 @@ func TestDirectoryPageWithParent(t *testing.T) {
 		{Name: "subdir", Href: "path/subdir", IsDir: true},
 		{Name: "file.txt", Href: "path/file.txt", IsDir: false},
 	}
-	breadcrumbs := render.BuildBreadcrumbs("path")
-	err := render.RenderDirectoryPage(&buf, "path", &parent, items, breadcrumbs)
+	breadcrumbs := render.BuildBreadcrumbs("path", "root")
+	err := render.RenderDirectoryPage(&buf, "path", &parent, items, breadcrumbs, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -150,7 +150,7 @@ func TestDirectoryPageWithParent(t *testing.T) {
 
 func TestMarkdownPageBreadcrumb(t *testing.T) {
 	var buf bytes.Buffer
-	breadcrumbs := render.BuildBreadcrumbs("docs/f.md")
+	breadcrumbs := render.BuildBreadcrumbs("docs/f.md", "root")
 	err := render.RenderMarkdownPage(&buf, "f.md", nil, "<p>ok</p>", "/", "/docs/", "ok", breadcrumbs)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -170,7 +170,7 @@ func TestMarkdownPageBreadcrumb(t *testing.T) {
 
 func TestTextPageBreadcrumb(t *testing.T) {
 	var buf bytes.Buffer
-	breadcrumbs := render.BuildBreadcrumbs("src/main.go")
+	breadcrumbs := render.BuildBreadcrumbs("src/main.go", "root")
 	err := render.RenderTextPage(&buf, "main.go", "code", "/src/", "code", "go", breadcrumbs)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -190,8 +190,8 @@ func TestDirectoryPageWithoutParent(t *testing.T) {
 	items := []render.DirEntry{
 		{Name: "readme.md", Href: "readme.md", IsDir: false},
 	}
-	breadcrumbs := render.BuildBreadcrumbs("")
-	err := render.RenderDirectoryPage(&buf, "", nil, items, breadcrumbs)
+	breadcrumbs := render.BuildBreadcrumbs("", "root")
+	err := render.RenderDirectoryPage(&buf, "", nil, items, breadcrumbs, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -199,5 +199,43 @@ func TestDirectoryPageWithoutParent(t *testing.T) {
 
 	if !strings.Contains(out, `<span class="current">root</span>`) {
 		t.Error("expected root as current in breadcrumb for root directory")
+	}
+}
+
+func TestDirectoryPageEmptyState(t *testing.T) {
+	tests := []struct {
+		name        string
+		emptyReason string
+		wantText    string
+		wantMissing string
+	}{
+		{
+			name:        "truly empty directory",
+			emptyReason: "empty",
+			wantText:    "This directory is empty.",
+			wantMissing: "file-list",
+		},
+		{
+			name:        "all files hidden by ignore rules",
+			emptyReason: "all_hidden",
+			wantText:    "All files in this directory are hidden.",
+			wantMissing: "file-list",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			err := render.RenderDirectoryPage(&buf, "somedir", nil, nil, nil, tt.emptyReason)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			out := buf.String()
+			if !strings.Contains(out, tt.wantText) {
+				t.Errorf("expected %q in output", tt.wantText)
+			}
+			if strings.Contains(out, tt.wantMissing) {
+				t.Errorf("expected %q to be absent from output", tt.wantMissing)
+			}
+		})
 	}
 }

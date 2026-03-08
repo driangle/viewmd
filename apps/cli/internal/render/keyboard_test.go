@@ -14,7 +14,7 @@ func TestDirectoryPageKeyboardNavJS(t *testing.T) {
 	items := []render.DirEntry{
 		{Name: "file.txt", Href: "file.txt", IsDir: false},
 	}
-	err := render.RenderDirectoryPage(&buf, "path", &parent, items, nil)
+	err := render.RenderDirectoryPage(&buf, "path", &parent, items, nil, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -49,7 +49,7 @@ func TestDirectoryPageKeyboardHint(t *testing.T) {
 	items := []render.DirEntry{
 		{Name: "file.txt", Href: "file.txt", IsDir: false},
 	}
-	err := render.RenderDirectoryPage(&buf, "", nil, items, nil)
+	err := render.RenderDirectoryPage(&buf, "", nil, items, nil, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -74,7 +74,7 @@ func TestDirectoryPageHighlightCSS(t *testing.T) {
 	items := []render.DirEntry{
 		{Name: "a.txt", Href: "a.txt", IsDir: false},
 	}
-	err := render.RenderDirectoryPage(&buf, "", nil, items, nil)
+	err := render.RenderDirectoryPage(&buf, "", nil, items, nil, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -89,8 +89,8 @@ func TestDirectoryPageBreadcrumbParentHref(t *testing.T) {
 	var buf bytes.Buffer
 	parent := ""
 	items := []render.DirEntry{}
-	breadcrumbs := render.BuildBreadcrumbs("sub")
-	err := render.RenderDirectoryPage(&buf, "sub", &parent, items, breadcrumbs)
+	breadcrumbs := render.BuildBreadcrumbs("sub", "root")
+	err := render.RenderDirectoryPage(&buf, "sub", &parent, items, breadcrumbs, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

@@ -3,14 +3,15 @@ package render
 import "strings"
 
 // BuildBreadcrumbs creates breadcrumb segments from a URL request path.
-// For example, "docs/api/file.md" produces:
+// rootLabel is the display name for the root segment (typically the absolute path).
+// For example, BuildBreadcrumbs("docs/api/file.md", "/home/user/project") produces:
 //
-//	[{Name: "root", Href: "/"}, {Name: "docs", Href: "/docs/"}, {Name: "api", Href: "/docs/api/"}, {Name: "file.md", Href: ""}]
+//	[{Name: "/home/user/project", Href: "/"}, {Name: "docs", Href: "/docs/"}, {Name: "api", Href: "/docs/api/"}, {Name: "file.md", Href: ""}]
 //
 // The last segment (the current file) has an empty Href since it's not a link.
-func BuildBreadcrumbs(reqPath string) []BreadcrumbSegment {
+func BuildBreadcrumbs(reqPath string, rootLabel string) []BreadcrumbSegment {
 	segments := []BreadcrumbSegment{
-		{Name: "root", Href: "/"},
+		{Name: rootLabel, Href: "/"},
 	}
 
 	reqPath = strings.TrimPrefix(reqPath, "/")

@@ -20,7 +20,7 @@
             --radius: 6px;
             --max-width: 860px;
         }
-        body { max-width: var(--max-width); margin: 40px auto; padding: 0 20px; font-family: var(--font-sans); color: var(--color-text); background-color: var(--color-bg); }
+        body { max-width: var(--max-width); margin: 12px auto 40px; padding: 0 20px; font-family: var(--font-sans); color: var(--color-text); background-color: var(--color-bg); }
         h1 { font-size: 1.25em; font-weight: 600; color: var(--color-text); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border-light); }
         ul { list-style: none; padding: 0; margin: 0; }
         li { margin: 0; }
@@ -31,13 +31,13 @@
         li.kb-active { background: var(--color-accent-bg); border-radius: var(--radius); }
         li.kb-active a { color: var(--color-accent-text); font-weight: 600; }
         .kb-hint { margin-top: 24px; font-size: 0.75em; color: var(--color-text-secondary); letter-spacing: 0.01em; }
-        .breadcrumb { font-size: 0.85em; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border-light); color: var(--color-text-secondary); }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border-light); }
+        .breadcrumb { font-size: 0.85em; color: var(--color-text-secondary); }
         .breadcrumb a { color: var(--color-text-secondary); text-decoration: none; }
         .breadcrumb a:hover { color: var(--color-link); text-decoration: underline; }
         .breadcrumb .separator { margin: 0 4px; color: var(--color-border); }
         .breadcrumb .current { color: var(--color-text); font-weight: 600; }
         footer { margin-top: 40px; padding-top: 8px; border-top: 1px solid var(--color-border-light); font-size: 0.75em; color: var(--color-text-secondary); }
-        .dir-top-bar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
         .search-panel { display: none; }
         .search-panel.active { display: block; }
         .search-bar { position: relative; margin-bottom: 12px; }
@@ -47,15 +47,26 @@
         .search-results .snippet { display: block; font-size: 0.8em; color: var(--color-text-secondary); font-family: var(--font-mono); padding: 2px 10px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .search-results mark { background: var(--color-accent-bg); color: var(--color-accent-text); font-weight: 600; border-radius: 2px; padding: 0 1px; }
         .search-no-results { padding: 16px 10px; color: var(--color-text-secondary); font-size: 0.9em; }
+        .dir-notice { padding: 40px 10px; text-align: center; color: var(--color-text-secondary); font-size: 0.9em; line-height: 1.5; }
+        .dir-notice .dir-notice-hint { font-size: 0.8em; margin-top: 6px; }
 {{template "theme-vars-dark"}}
 {{template "theme-toggle-css"}}
     </style>
 {{template "theme-init"}}
 </head>
 <body>
-    <div class="dir-top-bar">{{template "theme-toggle"}}</div>
-    <nav class="breadcrumb" data-parent-href="{{if .HasParent}}/{{.ParentHref}}{{else}}/{{end}}">{{range $i, $seg := .Breadcrumbs}}{{if $i}}<span class="separator">/</span>{{end}}{{if $seg.Href}}<a href="{{$seg.Href}}">{{$seg.Name}}</a>{{else}}<span class="current">{{$seg.Name}}</span>{{end}}{{end}}</nav>
-    <div id="search-panel" class="search-panel">
+    <div class="top-bar">
+        <nav class="breadcrumb" data-parent-href="{{if .HasParent}}/{{.ParentHref}}{{else}}/{{end}}">{{range $i, $seg := .Breadcrumbs}}{{if $i}}<span class="separator">/</span>{{end}}{{if $seg.Href}}<a href="{{$seg.Href}}">{{$seg.Name}}</a>{{else}}<span class="current">{{$seg.Name}}</span>{{end}}{{end}}</nav>
+        <div>{{template "theme-toggle"}}</div>
+    </div>
+{{if .EmptyReason}}{{if eq .EmptyReason "empty"}}    <div class="dir-notice">
+        <div>This directory is empty.</div>
+    </div>
+{{else}}    <div class="dir-notice">
+        <div>All files in this directory are hidden.</div>
+        <div class="dir-notice-hint">Ignore rules are filtering every entry.</div>
+    </div>
+{{end}}{{else}}    <div id="search-panel" class="search-panel">
         <div class="search-bar">
             <input type="text" id="search-input" placeholder="Search files..." autocomplete="off">
             <span id="search-mode" class="search-mode">Search by filename and contents</span>
@@ -68,8 +79,9 @@
 {{range .Items}}<li><a href="/{{.Href}}" class="{{.CSSClass}}">{{.Label}}</a></li>
 {{end}}    </ul>
     <div class="kb-hint">&#x2191;&#x2193; navigate &middot; Enter/&#x2192; open &middot; &#x2190; back &middot; / search</div>
+{{end}}
     <footer>viewmd {{.Version}}</footer>
-    <script>
+{{if not .EmptyReason}}    <script>
     (function() {
         var fileList = document.getElementById('file-list');
         var items = document.querySelectorAll('#file-list li');
@@ -266,6 +278,15 @@
                 return;
             }
 
+            if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+                var bc = document.querySelector('.breadcrumb');
+                var href = bc ? bc.getAttribute('data-parent-href') : null;
+                if (href) {
+                    e.preventDefault();
+                    window.location.href = addParam(href, 'from', currentDirName());
+                }
+                return;
+            }
             if (!items.length) return;
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
@@ -283,16 +304,10 @@
                     e.preventDefault();
                     window.location.href = addParam(link.href, 'kb', '1');
                 }
-            } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
-                var bc = document.querySelector('.breadcrumb');
-                var href = bc ? bc.getAttribute('data-parent-href') : null;
-                if (href) {
-                    e.preventDefault();
-                    window.location.href = addParam(href, 'from', currentDirName());
-                }
             }
         });
     })();
     </script>
+{{end}}
 </body>
 </html>

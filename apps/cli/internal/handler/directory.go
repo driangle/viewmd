@@ -99,6 +99,8 @@ func (h *Handler) serveDirectoryListing(w http.ResponseWriter, _ *http.Request, 
 		return
 	}
 
+	totalCount := len(entries)
+
 	if len(h.IgnorePatterns) > 0 {
 		entries = filterIgnoredEntries(entries, dirPath, h.IgnorePatterns)
 	}
@@ -142,10 +144,19 @@ func (h *Handler) serveDirectoryListing(w http.ResponseWriter, _ *http.Request, 
 	if bcPath == "." {
 		bcPath = ""
 	}
-	breadcrumbs := render.BuildBreadcrumbs(bcPath)
+	breadcrumbs := render.BuildBreadcrumbs(bcPath, h.root)
+
+	var emptyReason string
+	if len(items) == 0 {
+		if totalCount == 0 {
+			emptyReason = "empty"
+		} else {
+			emptyReason = "all_hidden"
+		}
+	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := render.RenderDirectoryPage(w, dirPath, parentHref, items, breadcrumbs); err != nil {
+	if err := render.RenderDirectoryPage(w, dirPath, parentHref, items, breadcrumbs, emptyReason); err != nil {
 		http.Error(w, fmt.Sprintf("Error rendering page: %v", err),
 			http.StatusInternalServerError)
 	}

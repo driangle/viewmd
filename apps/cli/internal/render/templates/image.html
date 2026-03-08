@@ -27,10 +27,10 @@
         .breadcrumb .separator { margin: 0 4px; color: var(--color-border); }
         .breadcrumb .current { color: var(--color-text); font-weight: 600; }
         .header { display: flex; justify-content: space-between; align-items: center; background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius) var(--radius) 0 0; padding: 10px 16px; font-weight: 600; font-size: 0.9em; }
-        .content { background: var(--color-bg); border: 1px solid var(--color-border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); padding: 48px 16px; text-align: center; }
-        .content p { margin: 8px 0; color: var(--color-text-secondary); font-size: 0.95em; }
-        .content .message { font-size: 1.1em; margin-bottom: 16px; }
-        .download-btn { display: inline-block; margin-top: 16px; background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 8px 20px; font-size: 0.9em; cursor: pointer; color: var(--color-text); font-family: var(--font-sans); text-decoration: none; transition: background 0.1s; }
+        .content { background: var(--color-bg); border: 1px solid var(--color-border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); padding: 24px 16px; text-align: center; }
+        .content img { max-width: 100%; height: auto; border-radius: var(--radius); }
+        .content .meta { margin-top: 12px; color: var(--color-text-secondary); font-size: 0.85em; }
+        .download-btn { display: inline-block; margin-top: 12px; background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 8px 20px; font-size: 0.9em; cursor: pointer; color: var(--color-text); font-family: var(--font-sans); text-decoration: none; transition: background 0.1s; }
         .download-btn:hover { background: var(--color-border-light); }
         footer { margin-top: 40px; padding-top: 8px; border-top: 1px solid var(--color-border-light); font-size: 0.75em; color: var(--color-text-secondary); }
 {{template "theme-vars-dark"}}
@@ -42,9 +42,9 @@
     <nav class="breadcrumb" data-parent-href="{{.ParentHref}}">{{range $i, $seg := .Breadcrumbs}}{{if $i}}<span class="separator">/</span>{{end}}{{if $seg.Href}}<a href="{{$seg.Href}}">{{$seg.Name}}</a>{{else}}<span class="current">{{$seg.Name}}</span>{{end}}{{end}}</nav>
     <div class="header"><span>{{.FileName}}</span><div>{{template "theme-toggle"}}</div></div>
     <div class="content">
-        <p class="message">No preview available for {{if .FileType}}.{{.FileType}} files{{else}}this file type{{end}}</p>
-        <p>{{.FileSize}}</p>
-        <a class="download-btn" href="{{.DownloadHref}}">Download file</a>
+        <img src="{{.ImageSrc}}" alt="{{.FileName}}">
+        <div class="meta">{{.FileSize}}</div>
+        <a class="download-btn" href="{{.ImageSrc}}" download>Download</a>
     </div>
     <footer>viewmd {{.Version}}</footer>
     <script>

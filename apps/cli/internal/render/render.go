@@ -82,15 +82,31 @@ func formatFileSize(size int64) string {
 	}
 }
 
+// RenderImagePage writes a full HTML page for an inline image viewer.
+func RenderImagePage(w io.Writer, fileName string, fileSize int64, parentHref string, breadcrumbs []BreadcrumbSegment) error {
+	data := imageData{
+		FileName:    fileName,
+		ImageSrc:    "?raw=1",
+		FileSize:    formatFileSize(fileSize),
+		ParentHref:  parentHref,
+		Breadcrumbs: breadcrumbs,
+		Version:     Version,
+	}
+	return templates.ExecuteTemplate(w, "image.html", data)
+}
+
 // RenderDirectoryPage writes a full HTML page for a directory listing.
 // parentHref is nil for the root directory.
-func RenderDirectoryPage(w io.Writer, displayPath string, parentHref *string, items []DirEntry, breadcrumbs []BreadcrumbSegment) error {
+// emptyReason is "" when items exist, "empty" for truly empty dirs,
+// or "all_hidden" when all entries were filtered by ignore rules.
+func RenderDirectoryPage(w io.Writer, displayPath string, parentHref *string, items []DirEntry, breadcrumbs []BreadcrumbSegment, emptyReason string) error {
 	data := directoryData{
 		DisplayPath: displayPath,
 		HasParent:   parentHref != nil,
 		ParentHref:  "",
 		Breadcrumbs: breadcrumbs,
 		Items:       items,
+		EmptyReason: emptyReason,
 		Version:     Version,
 	}
 	if parentHref != nil {

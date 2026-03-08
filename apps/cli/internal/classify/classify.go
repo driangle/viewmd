@@ -7,6 +7,19 @@ import (
 	"strings"
 )
 
+// imageExtensions contains file extensions recognized as image files.
+var imageExtensions = map[string]bool{
+	".png": true, ".jpg": true, ".jpeg": true, ".gif": true,
+	".svg": true, ".webp": true, ".bmp": true, ".ico": true,
+	".avif": true,
+}
+
+// IsImageFile reports whether the given filename is a recognized image type.
+func IsImageFile(name string) bool {
+	ext := strings.ToLower(filepath.Ext(name))
+	return imageExtensions[ext]
+}
+
 // textExtensions contains file extensions recognized as text files.
 // Markdown extensions (.md, .markdown) are intentionally excluded
 // because they have their own rendering path.

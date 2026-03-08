@@ -56,7 +56,7 @@ func TestBuildBreadcrumbs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := BuildBreadcrumbs(tt.reqPath)
+			got := BuildBreadcrumbs(tt.reqPath, "root")
 			if len(got) != len(tt.want) {
 				t.Fatalf("BuildBreadcrumbs(%q) returned %d segments, want %d", tt.reqPath, len(got), len(tt.want))
 			}

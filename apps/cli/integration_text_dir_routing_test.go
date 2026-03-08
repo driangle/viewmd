@@ -192,7 +192,7 @@ func TestSubdirListingHasBreadcrumb(t *testing.T) {
 	if !strings.Contains(body, `class="breadcrumb"`) {
 		t.Error("expected breadcrumb in subdirectory listing")
 	}
-	if !strings.Contains(body, `<a href="/">root</a>`) {
+	if !strings.Contains(body, `<a href="/">`+srv.TempDir+`</a>`) {
 		t.Error("expected root link in breadcrumb")
 	}
 }
@@ -230,7 +230,7 @@ func TestBinaryFileServedRawWithQueryParam(t *testing.T) {
 	}
 }
 
-func TestBinaryFileServesUnsupportedPageIntegration(t *testing.T) {
+func TestImageFileServesImagePageIntegration(t *testing.T) {
 	pngHeader := append([]byte("\x89PNG\r\n\x1a\n"), make([]byte, 20)...)
 	srv := testutil.StartServer(t, nil)
 	defer srv.Close()
@@ -243,6 +243,25 @@ func TestBinaryFileServesUnsupportedPageIntegration(t *testing.T) {
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatalf("reading image.png response: %v", err)
+	}
+	body := string(data)
+	if !strings.Contains(body, "<img") {
+		t.Error("expected image page with <img tag")
+	}
+}
+
+func TestBinaryFileServesUnsupportedPageIntegration(t *testing.T) {
+	srv := testutil.StartServer(t, nil)
+	defer srv.Close()
+
+	os.WriteFile(filepath.Join(srv.TempDir, "data.bin"), []byte{0xff, 0xfe, 0xfd}, 0o644)
+
+	resp := testutil.GetResponse(t, srv.URL, "/data.bin")
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("reading data.bin response: %v", err)
 	}
 	body := string(data)
 	if !strings.Contains(body, "No preview available") {
