@@ -1,7 +1,7 @@
 ---
 title: "Add full-text search with keyboard-driven UI"
 id: "030"
-status: in-progress
+status: completed
 priority: high
 type: feature
 tags: ["search", "ui", "keyboard"]
