@@ -10,22 +10,22 @@ func TestParse(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
-		wantMeta map[string]string
+		wantMeta []frontmatter.KeyValue
 		wantBody string
 	}{
 		{
 			name:     "basic",
 			input:    "---\ntitle: Hello\n---\n# Body",
-			wantMeta: map[string]string{"title": "Hello"},
+			wantMeta: []frontmatter.KeyValue{{Key: "title", Value: "Hello"}},
 			wantBody: "\n# Body",
 		},
 		{
-			name:  "multiple keys",
+			name:  "multiple keys preserve order",
 			input: "---\ntitle: Hello\ndate: 2024-01-01\ntags: a, b\n---\nBody",
-			wantMeta: map[string]string{
-				"title": "Hello",
-				"date":  "2024-01-01",
-				"tags":  "a, b",
+			wantMeta: []frontmatter.KeyValue{
+				{Key: "title", Value: "Hello"},
+				{Key: "date", Value: "2024-01-01"},
+				{Key: "tags", Value: "a, b"},
 			},
 			wantBody: "\nBody",
 		},
@@ -50,49 +50,49 @@ func TestParse(t *testing.T) {
 		{
 			name:  "value with colons",
 			input: "---\nurl: https://example.com\ntime: 10:30:00\n---\nBody",
-			wantMeta: map[string]string{
-				"url":  "https://example.com",
-				"time": "10:30:00",
+			wantMeta: []frontmatter.KeyValue{
+				{Key: "url", Value: "https://example.com"},
+				{Key: "time", Value: "10:30:00"},
 			},
 			wantBody: "\nBody",
 		},
 		{
 			name:     "whitespace around keys and values",
 			input:    "---\n  title  :  Hello World  \n---\nBody",
-			wantMeta: map[string]string{"title": "Hello World"},
+			wantMeta: []frontmatter.KeyValue{{Key: "title", Value: "Hello World"}},
 			wantBody: "\nBody",
 		},
 		{
 			name:     "empty value",
 			input:    "---\ndraft:\n---\nBody",
-			wantMeta: map[string]string{"draft": ""},
+			wantMeta: []frontmatter.KeyValue{{Key: "draft", Value: ""}},
 			wantBody: "\nBody",
 		},
 		{
 			name:  "lines without colon skipped",
 			input: "---\ntitle: Hello\njust a line\ndate: 2024\n---\nBody",
-			wantMeta: map[string]string{
-				"title": "Hello",
-				"date":  "2024",
+			wantMeta: []frontmatter.KeyValue{
+				{Key: "title", Value: "Hello"},
+				{Key: "date", Value: "2024"},
 			},
 			wantBody: "\nBody",
 		},
 		{
 			name:     "body preserved",
 			input:    "---\ntitle: T\n---\nLine 1\nLine 2\n\nLine 4",
-			wantMeta: map[string]string{"title": "T"},
+			wantMeta: []frontmatter.KeyValue{{Key: "title", Value: "T"}},
 			wantBody: "\nLine 1\nLine 2\n\nLine 4",
 		},
 		{
 			name:     "triple dash in body",
 			input:    "---\ntitle: T\n---\nBody\n---\nMore body",
-			wantMeta: map[string]string{"title": "T"},
+			wantMeta: []frontmatter.KeyValue{{Key: "title", Value: "T"}},
 			wantBody: "\nBody\n---\nMore body",
 		},
 		{
 			name:     "only delimiters",
 			input:    "---\n---\nBody",
-			wantMeta: map[string]string{},
+			wantMeta: []frontmatter.KeyValue{},
 			wantBody: "\nBody",
 		},
 		{
@@ -119,11 +119,13 @@ func TestParse(t *testing.T) {
 					t.Errorf("meta length = %d, want %d\n  got:  %v\n  want: %v",
 						len(meta), len(tt.wantMeta), meta, tt.wantMeta)
 				}
-				for k, want := range tt.wantMeta {
-					if got, ok := meta[k]; !ok {
-						t.Errorf("missing key %q", k)
-					} else if got != want {
-						t.Errorf("meta[%q] = %q, want %q", k, got, want)
+				for i, want := range tt.wantMeta {
+					if i >= len(meta) {
+						break
+					}
+					if meta[i].Key != want.Key || meta[i].Value != want.Value {
+						t.Errorf("meta[%d] = {%q, %q}, want {%q, %q}",
+							i, meta[i].Key, meta[i].Value, want.Key, want.Value)
 					}
 				}
 			}

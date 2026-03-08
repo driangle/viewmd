@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+
+	"github.com/driangle/viewmd/apps/cli/internal/frontmatter"
 )
 
 // Version is set by the main package at startup.
@@ -20,21 +22,15 @@ var templates = template.Must(
 )
 
 // RenderMarkdownPage writes a full HTML page for rendered markdown content.
-// frontmatter may be nil if no frontmatter was parsed.
+// meta may be nil if no frontmatter was parsed.
 // bodyHTML is already-rendered HTML from the markdown converter.
-func RenderMarkdownPage(w io.Writer, fileName string, frontmatter map[string]string, bodyHTML string, baseURL string, parentHref string, rawContent string, breadcrumbs []BreadcrumbSegment) error {
-	var rows []FrontmatterRow
-	for k, v := range frontmatter {
-		rows = append(rows, FrontmatterRow{Key: k, Value: v})
-	}
-
+func RenderMarkdownPage(w io.Writer, fileName string, meta []frontmatter.KeyValue, bodyHTML string, baseURL string, parentHref string, rawContent string, breadcrumbs []BreadcrumbSegment) error {
 	data := markdownData{
 		FileName:        fileName,
 		BaseURL:         baseURL,
 		ParentHref:      parentHref,
 		Breadcrumbs:     breadcrumbs,
-		Frontmatter:     frontmatter,
-		FrontmatterRows: rows,
+		FrontmatterRows: meta,
 		BodyHTML:        template.HTML(bodyHTML),
 		RawContent:      rawContent,
 		Version:         Version,

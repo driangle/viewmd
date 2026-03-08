@@ -5,12 +5,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/driangle/viewmd/apps/cli/internal/frontmatter"
 	"github.com/driangle/viewmd/apps/cli/internal/render"
 )
 
 func TestMarkdownPageWithFrontmatter(t *testing.T) {
 	var buf bytes.Buffer
-	fm := map[string]string{"title": "Hello", "author": "Alice"}
+	fm := []frontmatter.KeyValue{{Key: "title", Value: "Hello"}, {Key: "author", Value: "Alice"}}
 	err := render.RenderMarkdownPage(&buf, "test.md", fm, "<p>Body</p>", "/", "/", "# Body", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -75,7 +76,7 @@ func TestMarkdownPageEscapesFileName(t *testing.T) {
 
 func TestMarkdownPageEscapesFrontmatterValues(t *testing.T) {
 	var buf bytes.Buffer
-	fm := map[string]string{"key": "<b>bold</b>"}
+	fm := []frontmatter.KeyValue{{Key: "key", Value: "<b>bold</b>"}}
 	err := render.RenderMarkdownPage(&buf, "test.md", fm, "<p>ok</p>", "/", "/", "ok", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

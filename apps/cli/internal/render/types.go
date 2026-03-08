@@ -1,12 +1,10 @@
 package render
 
-import "html/template"
+import (
+	"html/template"
 
-// FrontmatterRow holds a single key-value pair for the frontmatter table.
-type FrontmatterRow struct {
-	Key   string
-	Value string
-}
+	"github.com/driangle/viewmd/apps/cli/internal/frontmatter"
+)
 
 // BreadcrumbSegment represents one clickable segment in a file path breadcrumb.
 type BreadcrumbSegment struct {
@@ -20,8 +18,7 @@ type markdownData struct {
 	BaseURL         string
 	ParentHref      string
 	Breadcrumbs     []BreadcrumbSegment
-	Frontmatter     map[string]string
-	FrontmatterRows []FrontmatterRow
+	FrontmatterRows []frontmatter.KeyValue
 	BodyHTML        template.HTML
 	RawContent      string
 	Version         string

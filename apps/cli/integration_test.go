@@ -67,9 +67,13 @@ func TestFrontmatterStrippedFromBody(t *testing.T) {
 
 	body := testutil.Get(t, srv.URL, "/stripped.md")
 
-	// Split after the frontmatter div to check only the body portion
+	// Extract the rendered body between the frontmatter div and the raw-content textarea.
+	// The raw textarea intentionally contains the full file (including frontmatter) for copying.
 	parts := strings.SplitN(body, "</div>", 2)
 	afterFM := parts[len(parts)-1]
+	if idx := strings.Index(afterFM, `<textarea id="raw-content"`); idx >= 0 {
+		afterFM = afterFM[:idx]
+	}
 
 	if strings.Contains(afterFM, "status: draft") {
 		t.Error("frontmatter YAML should not appear in the rendered body")

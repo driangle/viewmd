@@ -53,7 +53,7 @@ func ServeMarkdown(w http.ResponseWriter, filePath string, baseURL string, paren
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := render.RenderMarkdownPage(w, filepath.Base(filePath), meta, bodyHTML, baseURL, parentHref, body, breadcrumbs); err != nil {
+	if err := render.RenderMarkdownPage(w, filepath.Base(filePath), meta, bodyHTML, baseURL, parentHref, string(content), breadcrumbs); err != nil {
 		http.Error(w, fmt.Sprintf("Error rendering page: %v", err), http.StatusInternalServerError)
 	}
 }

@@ -62,7 +62,7 @@
             {{template "theme-toggle"}}
         </div>
     </div>
-    {{if .Frontmatter}}<div class="frontmatter"><table>{{range .FrontmatterRows}}<tr><td class="fm-key">{{.Key}}</td><td>{{.Value}}</td></tr>
+    {{if .FrontmatterRows}}<div class="frontmatter"><table>{{range .FrontmatterRows}}<tr><td class="fm-key">{{.Key}}</td><td>{{.Value}}</td></tr>
 {{end}}</table></div>
 {{end}}{{.BodyHTML}}
     <textarea id="raw-content" style="display:none;">{{.RawContent}}</textarea>

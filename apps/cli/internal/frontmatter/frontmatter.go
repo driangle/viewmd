@@ -3,11 +3,17 @@ package frontmatter
 
 import "strings"
 
+// KeyValue holds a single frontmatter key-value pair.
+type KeyValue struct {
+	Key   string
+	Value string
+}
+
 // Parse extracts frontmatter key-value pairs from content delimited by "---".
 // Returns (nil, content) when no valid frontmatter is found.
-// Returns (map, body) when frontmatter is present, where body is everything
-// after the closing "---" delimiter.
-func Parse(content string) (map[string]string, string) {
+// Returns (pairs, body) when frontmatter is present, where body is everything
+// after the closing "---" delimiter. Pairs preserve the original order.
+func Parse(content string) ([]KeyValue, string) {
 	if !strings.HasPrefix(content, "---") {
 		return nil, content
 	}
@@ -17,17 +23,21 @@ func Parse(content string) (map[string]string, string) {
 		return nil, content
 	}
 
-	meta := make(map[string]string)
+	var pairs []KeyValue
 	block := strings.TrimSpace(parts[1])
 	if block != "" {
 		for _, line := range strings.Split(block, "\n") {
 			if idx := strings.Index(line, ":"); idx >= 0 {
 				key := strings.TrimSpace(line[:idx])
 				value := strings.TrimSpace(line[idx+1:])
-				meta[key] = value
+				pairs = append(pairs, KeyValue{Key: key, Value: value})
 			}
 		}
 	}
 
-	return meta, parts[2]
+	if pairs == nil {
+		pairs = []KeyValue{}
+	}
+
+	return pairs, parts[2]
 }
