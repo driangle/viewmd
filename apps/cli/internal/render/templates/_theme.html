@@ -45,15 +45,13 @@
     <button class="theme-toggle" onclick="toggleTheme(this)" aria-label="Toggle theme"></button>
     <script>
     (function() {
-        function icon(theme) { return theme === 'dark' ? '\u2600\uFE0F' : '\uD83C\uDF19'; }
         var btn = document.querySelector('.theme-toggle');
+        btn.textContent = '\u25D0';
         var theme = document.documentElement.getAttribute('data-theme') || 'light';
-        btn.textContent = icon(theme);
         window.toggleTheme = function(b) {
             theme = theme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('viewmd-theme', theme);
-            b.textContent = icon(theme);
         };
     })();
     </script>

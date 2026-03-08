@@ -60,6 +60,17 @@ func (e DirEntry) Label() string {
 	return e.Name
 }
 
+// unsupportedData holds template data for the unsupported file page.
+type unsupportedData struct {
+	FileName     string
+	FileType     string
+	FileSize     string
+	DownloadHref string
+	ParentHref   string
+	Breadcrumbs  []BreadcrumbSegment
+	Version      string
+}
+
 // directoryData holds template data for the directory listing page.
 type directoryData struct {
 	DisplayPath string

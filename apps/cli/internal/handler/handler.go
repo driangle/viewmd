@@ -46,6 +46,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reqPath = strings.TrimPrefix(reqPath, "/")
 	reqPath = strings.TrimSuffix(reqPath, "/")
 
+	if reqPath == "-/search" {
+		h.serveSearch(w, r)
+		return
+	}
+
 	if reqPath == "" {
 		h.serveDirectoryListing(w, r, ".")
 		return
@@ -73,6 +78,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.URL.Query().Get("raw") == "1" {
+		http.ServeFile(w, r, fullPath)
+		return
+	}
+
 	parentHref := parentHrefFromPath(reqPath)
 	breadcrumbs := render.BuildBreadcrumbs(reqPath)
 	ext := strings.ToLower(filepath.Ext(fullPath))
@@ -80,9 +90,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case ext == ".md" || ext == ".markdown":
 		markdown.ServeMarkdown(w, fullPath, parentHref, parentHref, breadcrumbs)
 	case classify.IsTextFile(info.Name()):
-		serveTextFile(w, r, fullPath, parentHref, breadcrumbs)
+		serveTextFile(w, fullPath, parentHref, breadcrumbs)
 	default:
-		http.ServeFile(w, r, fullPath)
+		serveUnknownFile(w, fullPath, info, parentHref, breadcrumbs)
 	}
 }
 
@@ -96,8 +106,39 @@ func parentHrefFromPath(reqPath string) string {
 	return "/" + filepath.ToSlash(dir) + "/"
 }
 
+// serveUnknownFile handles files with unrecognized extensions by probing the
+// first 8KB for valid UTF-8. Text files are rendered with the text template;
+// binary files get an unsupported-file page with a download link.
+func serveUnknownFile(w http.ResponseWriter, filePath string, info os.FileInfo, parentHref string, breadcrumbs []render.BreadcrumbSegment) {
+	f, err := os.Open(filePath)
+	if err != nil {
+		http.Error(w, "Error reading file", http.StatusInternalServerError)
+		return
+	}
+	defer f.Close()
+
+	buf := make([]byte, 8192)
+	n, _ := f.Read(buf)
+	if n > 0 && utf8.Valid(buf[:n]) {
+		serveTextFile(w, filePath, parentHref, breadcrumbs)
+		return
+	}
+	serveUnsupportedFile(w, info, parentHref, breadcrumbs)
+}
+
+// serveUnsupportedFile renders the unsupported file page with a download link.
+func serveUnsupportedFile(w http.ResponseWriter, info os.FileInfo, parentHref string, breadcrumbs []render.BreadcrumbSegment) {
+	ext := filepath.Ext(info.Name())
+	fileType := strings.TrimPrefix(ext, ".")
+	downloadHref := "?raw=1"
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := render.RenderUnsupportedPage(w, info.Name(), fileType, info.Size(), downloadHref, parentHref, breadcrumbs); err != nil {
+		http.Error(w, fmt.Sprintf("Error rendering page: %v", err), http.StatusInternalServerError)
+	}
+}
+
 // serveTextFile reads a file as UTF-8 text and renders it as an HTML page.
-func serveTextFile(w http.ResponseWriter, r *http.Request, filePath string, parentHref string, breadcrumbs []render.BreadcrumbSegment) {
+func serveTextFile(w http.ResponseWriter, filePath string, parentHref string, breadcrumbs []render.BreadcrumbSegment) {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error reading file: %v", err),
@@ -106,7 +147,12 @@ func serveTextFile(w http.ResponseWriter, r *http.Request, filePath string, pare
 	}
 
 	if !utf8.Valid(content) {
-		http.ServeFile(w, r, filePath)
+		info, err := os.Stat(filePath)
+		if err != nil {
+			http.Error(w, "Error reading file", http.StatusInternalServerError)
+			return
+		}
+		serveUnsupportedFile(w, info, parentHref, breadcrumbs)
 		return
 	}
 

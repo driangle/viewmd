@@ -4,6 +4,7 @@ package render
 
 import (
 	"embed"
+	"fmt"
 	"html/template"
 	"io"
 )
@@ -53,6 +54,34 @@ func RenderTextPage(w io.Writer, fileName string, escapedContent string, parentH
 		Version:     Version,
 	}
 	return templates.ExecuteTemplate(w, "text.html", data)
+}
+
+// RenderUnsupportedPage writes a full HTML page for an unsupported file type.
+func RenderUnsupportedPage(w io.Writer, fileName string, fileType string, fileSize int64, downloadHref string, parentHref string, breadcrumbs []BreadcrumbSegment) error {
+	data := unsupportedData{
+		FileName:     fileName,
+		FileType:     fileType,
+		FileSize:     formatFileSize(fileSize),
+		DownloadHref: downloadHref,
+		ParentHref:   parentHref,
+		Breadcrumbs:  breadcrumbs,
+		Version:      Version,
+	}
+	return templates.ExecuteTemplate(w, "unsupported.html", data)
+}
+
+// formatFileSize returns a human-readable file size string.
+func formatFileSize(size int64) string {
+	switch {
+	case size < 1024:
+		return fmt.Sprintf("%d B", size)
+	case size < 1024*1024:
+		return fmt.Sprintf("%.1f KB", float64(size)/1024)
+	case size < 1024*1024*1024:
+		return fmt.Sprintf("%.1f MB", float64(size)/(1024*1024))
+	default:
+		return fmt.Sprintf("%.1f GB", float64(size)/(1024*1024*1024))
+	}
 }
 
 // RenderDirectoryPage writes a full HTML page for a directory listing.

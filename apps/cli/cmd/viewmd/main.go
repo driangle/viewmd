@@ -55,6 +55,7 @@ func main() {
 
 	root, _ := os.Getwd()
 	printBanner(port, root)
+	printArgs(port, *autoReadme, *showAll)
 
 	h := handler.New(root)
 	h.AutoReadme = *autoReadme
@@ -78,7 +79,13 @@ func main() {
 
 func printBanner(port int, root string) {
 	fmt.Fprintf(os.Stderr, "viewmd v%s\n", version)
-	fmt.Fprintf(os.Stderr, "Serving %s on http://localhost:%d\n\n", root, port)
+	fmt.Fprintf(os.Stderr, "Serving %s on http://localhost:%d\n", root, port)
+}
+
+func printArgs(port int, autoReadme, showAll bool) {
+	fmt.Fprintf(os.Stderr, "  port:        %d\n", port)
+	fmt.Fprintf(os.Stderr, "  auto-readme: %v\n", autoReadme)
+	fmt.Fprintf(os.Stderr, "  show-all:    %v\n\n", showAll)
 }
 
 // loadShowAllFromConfig reads .viewmd.yaml from root and returns

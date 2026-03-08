@@ -211,7 +211,26 @@ func TestMarkdownRoutedToRenderer(t *testing.T) {
 	}
 }
 
-func TestBinaryFileServedRaw(t *testing.T) {
+func TestBinaryFileServedRawWithQueryParam(t *testing.T) {
+	pngHeader := append([]byte("\x89PNG\r\n\x1a\n"), make([]byte, 20)...)
+	srv := testutil.StartServer(t, nil)
+	defer srv.Close()
+
+	os.WriteFile(filepath.Join(srv.TempDir, "image.png"), pngHeader, 0o644)
+
+	resp := testutil.GetResponse(t, srv.URL, "/image.png?raw=1")
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("reading image.png response: %v", err)
+	}
+	if len(data) < 4 || string(data[:4]) != "\x89PNG" {
+		t.Error("expected raw PNG magic bytes in response")
+	}
+}
+
+func TestBinaryFileServesUnsupportedPageIntegration(t *testing.T) {
 	pngHeader := append([]byte("\x89PNG\r\n\x1a\n"), make([]byte, 20)...)
 	srv := testutil.StartServer(t, nil)
 	defer srv.Close()
@@ -225,8 +244,9 @@ func TestBinaryFileServedRaw(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reading image.png response: %v", err)
 	}
-	if len(data) < 4 || string(data[:4]) != "\x89PNG" {
-		t.Error("expected raw PNG magic bytes in response")
+	body := string(data)
+	if !strings.Contains(body, "No preview available") {
+		t.Error("expected unsupported page for binary file")
 	}
 }
 

@@ -1,7 +1,6 @@
 package handler_test
 
 import (
-	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -251,35 +250,50 @@ func TestRootListingBreadcrumbShowsOnlyRoot(t *testing.T) {
 	}
 }
 
-func TestBinaryFileServed(t *testing.T) {
+func TestBinaryFileServesUnsupportedPage(t *testing.T) {
 	h := handler.New(setupTestDir(t))
 	rec := request(h, "/image.png")
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("got status %d, want 200", rec.Code)
 	}
-	if !strings.Contains(rec.Header().Get("Content-Type"), "image/png") {
-		t.Fatalf("got content-type %q, want image/png", rec.Header().Get("Content-Type"))
+	if !strings.Contains(rec.Header().Get("Content-Type"), "text/html") {
+		t.Fatalf("got content-type %q, want text/html", rec.Header().Get("Content-Type"))
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "No preview available") {
+		t.Fatal("expected unsupported page with 'No preview available'")
+	}
+	if !strings.Contains(body, "?raw=1") {
+		t.Fatal("expected download link with ?raw=1")
 	}
 }
 
-func TestInvalidUTF8TextFallsBackToBinaryServe(t *testing.T) {
+func TestRawQueryParamServesBinaryDirect(t *testing.T) {
+	h := handler.New(setupTestDir(t))
+	rec := request(h, "/image.png?raw=1")
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("got status %d, want 200", rec.Code)
+	}
+	if strings.Contains(rec.Header().Get("Content-Type"), "text/html") {
+		t.Fatalf("raw=1 should not serve HTML, got %q", rec.Header().Get("Content-Type"))
+	}
+}
+
+func TestInvalidUTF8TextServesUnsupportedPage(t *testing.T) {
 	h := handler.New(setupTestDir(t))
 	rec := request(h, "/broken.txt")
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("got status %d, want 200", rec.Code)
 	}
-	if strings.Contains(rec.Header().Get("Content-Type"), "text/html") {
-		t.Fatalf("got content-type %q, expected non-HTML fallback",
-			rec.Header().Get("Content-Type"))
+	if !strings.Contains(rec.Header().Get("Content-Type"), "text/html") {
+		t.Fatalf("got content-type %q, want text/html", rec.Header().Get("Content-Type"))
 	}
-	if strings.Contains(rec.Body.String(), "<pre>") {
-		t.Fatal("expected binary fallback, not rendered HTML")
-	}
-	want := []byte{0xff, 0xfe, 0xfd, 0x00, 0x01}
-	if !bytes.Equal(rec.Body.Bytes(), want) {
-		t.Fatalf("got body %v, want %v", rec.Body.Bytes(), want)
+	body := rec.Body.String()
+	if !strings.Contains(body, "No preview available") {
+		t.Fatal("expected unsupported page for invalid UTF-8 text file")
 	}
 }
 
