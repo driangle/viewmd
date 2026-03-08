@@ -20,7 +20,7 @@
             --radius: 6px;
             --max-width: 860px;
         }
-        body { max-width: var(--max-width); margin: 40px auto; padding: 0 20px; font-family: var(--font-sans); color: var(--color-text); }
+        body { max-width: var(--max-width); margin: 40px auto; padding: 0 20px; font-family: var(--font-sans); color: var(--color-text); background-color: var(--color-bg); }
         .breadcrumb { font-size: 0.85em; margin-bottom: 12px; color: var(--color-text-secondary); }
         .breadcrumb a { color: var(--color-text-secondary); text-decoration: none; }
         .breadcrumb a:hover { color: var(--color-link); text-decoration: underline; }
@@ -32,11 +32,14 @@
         .copy-btn { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 4px 12px; font-size: 0.8em; cursor: pointer; color: var(--color-text-secondary); font-family: var(--font-sans); transition: background 0.1s; }
         .copy-btn:hover { background: var(--color-border-light); color: var(--color-text); }
         footer { margin-top: 40px; padding-top: 8px; border-top: 1px solid var(--color-border-light); font-size: 0.75em; color: var(--color-text-secondary); }
+{{template "theme-vars-dark"}}
+{{template "theme-toggle-css"}}
     </style>
+{{template "theme-init"}}
 </head>
 <body>
     <nav class="breadcrumb" data-parent-href="{{.ParentHref}}">{{range $i, $seg := .Breadcrumbs}}{{if $i}}<span class="separator">/</span>{{end}}{{if $seg.Href}}<a href="{{$seg.Href}}">{{$seg.Name}}</a>{{else}}<span class="current">{{$seg.Name}}</span>{{end}}{{end}}</nav>
-    <div class="header"><span>{{.FileName}}</span><button class="copy-btn" onclick="copyRaw(this)">Copy</button></div>
+    <div class="header"><span>{{.FileName}}</span><div><button class="copy-btn" onclick="copyRaw(this)">Copy</button> {{template "theme-toggle"}}</div></div>
     <div class="content"><pre>{{.Content}}</pre></div>
     <textarea id="raw-content" style="display:none;">{{.RawContent}}</textarea>
     <script>

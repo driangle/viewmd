@@ -21,7 +21,7 @@
             --radius: 6px;
             --max-width: 860px;
         }
-        body { max-width: var(--max-width); margin: 40px auto; padding: 0 20px; font-family: var(--font-sans); line-height: 1.6; color: var(--color-text); }
+        body { max-width: var(--max-width); margin: 40px auto; padding: 0 20px; font-family: var(--font-sans); line-height: 1.6; color: var(--color-text); background-color: var(--color-bg); }
         h1, h2, h3, h4, h5, h6 { margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
         h1 { padding-bottom: 0.3em; border-bottom: 1px solid var(--color-border-light); }
         pre { background: var(--color-bg-subtle); border: 1px solid var(--color-border-light); border-radius: var(--radius); padding: 16px; overflow-x: auto; font-size: 0.85em; line-height: 1.5; }
@@ -49,12 +49,18 @@
         .copy-btn { background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 4px 12px; font-size: 0.8em; cursor: pointer; color: var(--color-text-secondary); font-family: var(--font-sans); transition: background 0.1s; }
         .copy-btn:hover { background: var(--color-border-light); color: var(--color-text); }
         footer { margin-top: 40px; padding-top: 8px; border-top: 1px solid var(--color-border-light); font-size: 0.75em; color: var(--color-text-secondary); }
+{{template "theme-vars-dark"}}
+{{template "theme-toggle-css"}}
     </style>
+{{template "theme-init"}}
 </head>
 <body>
     <div class="top-bar">
         <nav class="breadcrumb" data-parent-href="{{.ParentHref}}">{{range $i, $seg := .Breadcrumbs}}{{if $i}}<span class="separator">/</span>{{end}}{{if $seg.Href}}<a href="{{$seg.Href}}">{{$seg.Name}}</a>{{else}}<span class="current">{{$seg.Name}}</span>{{end}}{{end}}</nav>
-        <button class="copy-btn" onclick="copyRaw(this)">Copy</button>
+        <div>
+            <button class="copy-btn" onclick="copyRaw(this)">Copy</button>
+            {{template "theme-toggle"}}
+        </div>
     </div>
     {{if .Frontmatter}}<div class="frontmatter"><table>{{range .FrontmatterRows}}<tr><td class="fm-key">{{.Key}}</td><td>{{.Value}}</td></tr>
 {{end}}</table></div>

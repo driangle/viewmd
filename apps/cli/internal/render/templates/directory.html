@@ -20,7 +20,7 @@
             --radius: 6px;
             --max-width: 860px;
         }
-        body { max-width: var(--max-width); margin: 40px auto; padding: 0 20px; font-family: var(--font-sans); color: var(--color-text); }
+        body { max-width: var(--max-width); margin: 40px auto; padding: 0 20px; font-family: var(--font-sans); color: var(--color-text); background-color: var(--color-bg); }
         h1 { font-size: 1.25em; font-weight: 600; color: var(--color-text); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border-light); }
         ul { list-style: none; padding: 0; margin: 0; }
         li { margin: 0; }
@@ -37,9 +37,14 @@
         .breadcrumb .separator { margin: 0 4px; color: var(--color-border); }
         .breadcrumb .current { color: var(--color-text); font-weight: 600; }
         footer { margin-top: 40px; padding-top: 8px; border-top: 1px solid var(--color-border-light); font-size: 0.75em; color: var(--color-text-secondary); }
+        .dir-top-bar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+{{template "theme-vars-dark"}}
+{{template "theme-toggle-css"}}
     </style>
+{{template "theme-init"}}
 </head>
 <body>
+    <div class="dir-top-bar">{{template "theme-toggle"}}</div>
     <nav class="breadcrumb" data-parent-href="{{if .HasParent}}/{{.ParentHref}}{{else}}/{{end}}">{{range $i, $seg := .Breadcrumbs}}{{if $i}}<span class="separator">/</span>{{end}}{{if $seg.Href}}<a href="{{$seg.Href}}">{{$seg.Name}}</a>{{else}}<span class="current">{{$seg.Name}}</span>{{end}}{{end}}</nav>
     <ul id="file-list">
 {{range .Items}}<li><a href="/{{.Href}}" class="{{.CSSClass}}">{{.Label}}</a></li>

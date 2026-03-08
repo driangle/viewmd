@@ -1,7 +1,7 @@
 ---
 title: "Add light/dark mode toggle with localStorage persistence"
 id: "022"
-status: pending
+status: completed
 priority: low
 type: feature
 tags: ["ui", "theme"]

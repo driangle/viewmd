@@ -1,0 +1,60 @@
+{{define "theme-vars-dark"}}
+        [data-theme="dark"] {
+            --color-text: #e6edf3;
+            --color-text-secondary: #8b949e;
+            --color-link: #58a6ff;
+            --color-bg: #0d1117;
+            --color-bg-subtle: #161b22;
+            --color-border: #30363d;
+            --color-border-light: #21262d;
+            --color-accent-bg: #1f2937;
+            --color-accent-text: #79c0ff;
+        }
+{{end}}
+
+{{define "theme-toggle-css"}}
+        .theme-toggle {
+            background: var(--color-bg-subtle);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 4px 10px;
+            font-size: 1em;
+            cursor: pointer;
+            color: var(--color-text-secondary);
+            font-family: var(--font-sans);
+            transition: background 0.1s;
+            line-height: 1;
+        }
+        .theme-toggle:hover {
+            background: var(--color-border-light);
+            color: var(--color-text);
+        }
+{{end}}
+
+{{define "theme-init"}}
+    <script>
+    (function() {
+        var t = localStorage.getItem('viewmd-theme');
+        if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+    })();
+    </script>
+{{end}}
+
+{{define "theme-toggle"}}
+    <button class="theme-toggle" onclick="toggleTheme(this)" aria-label="Toggle theme"></button>
+    <script>
+    (function() {
+        function icon(theme) { return theme === 'dark' ? '\u2600\uFE0F' : '\uD83C\uDF19'; }
+        var btn = document.querySelector('.theme-toggle');
+        var theme = document.documentElement.getAttribute('data-theme') || 'light';
+        btn.textContent = icon(theme);
+        window.toggleTheme = function(b) {
+            theme = theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('viewmd-theme', theme);
+            b.textContent = icon(theme);
+        };
+    })();
+    </script>
+{{end}}
