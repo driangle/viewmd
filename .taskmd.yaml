@@ -23,10 +23,8 @@ scopes:
     description: "VitePress documentation site"
   python:
     paths:
-      - "viewmd.py"
-      - "tests/"
-      - "pyproject.toml"
-    description: "Python CLI source, tests, and packaging"
+      - "python/"
+    description: "Archived Python CLI (PyPI-published)"
   root-docs:
     paths:
       - "README.md"

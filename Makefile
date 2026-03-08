@@ -8,7 +8,6 @@ test:
 
 lint:
 	$(MAKE) -C apps/cli lint
-	pylint viewmd.py tests/
 
 install:
 	$(MAKE) -C apps/cli install
