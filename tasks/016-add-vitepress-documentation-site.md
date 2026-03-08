@@ -1,7 +1,7 @@
 ---
 title: "Add VitePress documentation site"
 id: "016"
-status: pending
+status: completed
 priority: medium
 type: feature
 tags: ["docs", "vitepress"]
@@ -17,15 +17,15 @@ Add a VitePress-powered documentation site for viewmd, similar to the [taskmd do
 
 ## Tasks
 
-- [ ] Initialize VitePress project in a `docs/` directory (`npm init` + `vitepress` dependency)
-- [ ] Configure VitePress (`docs/.vitepress/config.ts`) with nav, sidebar, and site metadata
-- [ ] Create homepage (`docs/index.md`) with hero section and feature highlights
-- [ ] Write "Getting Started" section: installation, quick start, basic usage
-- [ ] Write "Guide" section: CLI usage, markdown rendering features, frontmatter support, directory listing
-- [ ] Write "Reference" section: CLI flags, configuration, supported file types
-- [ ] Add GitHub Pages deployment workflow (`.github/workflows/docs.yml`)
-- [ ] Add `docs:dev` and `docs:build` scripts to root or docs-level `package.json`
-- [ ] Verify the site builds and deploys correctly
+- [x] Initialize VitePress project in a `docs/` directory (`npm init` + `vitepress` dependency)
+- [x] Configure VitePress (`docs/.vitepress/config.ts`) with nav, sidebar, and site metadata
+- [x] Create homepage (`docs/index.md`) with hero section and feature highlights
+- [x] Write "Getting Started" section: installation, quick start, basic usage
+- [x] Write "Guide" section: CLI usage, markdown rendering features, frontmatter support, directory listing
+- [x] Write "Reference" section: CLI flags, configuration, supported file types
+- [x] Add GitHub Pages deployment workflow (`.github/workflows/docs.yml`)
+- [x] Add `docs:dev` and `docs:build` scripts to root or docs-level `package.json`
+- [x] Verify the site builds and deploys correctly
 
 ## Acceptance Criteria
 

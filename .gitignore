@@ -1,5 +1,8 @@
 .claude
 apps/cli/bin/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+docs/node_modules/
 __pycache__/
 *.pyc
 *.pyo
