@@ -28,6 +28,7 @@ func main() {
 	autoReadme := flag.Bool("auto-readme", false, "Auto-render README.md in directories")
 	showAll := flag.Bool("show-all", false, "Show all files, not just Markdown (shorthand: -a)")
 	flag.BoolVar(showAll, "a", false, "Show all files, not just Markdown")
+	ignoreFlag := flag.String("ignore", "", "Comma-separated ignore patterns (glob syntax)")
 	ver := flag.Bool("version", false, "Print version and exit")
 	flag.Parse()
 
@@ -54,12 +55,16 @@ func main() {
 	}
 
 	root, _ := os.Getwd()
+
+	ignorePatterns := buildIgnorePatterns(*ignoreFlag, root)
+
 	printBanner(port, root)
-	printArgs(port, *autoReadme, *showAll)
+	printArgs(port, *autoReadme, *showAll, ignorePatterns)
 
 	h := handler.New(root)
 	h.AutoReadme = *autoReadme
 	h.ShowAll = *showAll || loadShowAllFromConfig(root)
+	h.IgnorePatterns = ignorePatterns
 	srv := &http.Server{Handler: logging.Middleware(h)}
 
 	done := make(chan os.Signal, 1)
@@ -82,10 +87,71 @@ func printBanner(port int, root string) {
 	fmt.Fprintf(os.Stderr, "Serving %s on http://localhost:%d\n", root, port)
 }
 
-func printArgs(port int, autoReadme, showAll bool) {
+func printArgs(port int, autoReadme, showAll bool, ignorePatterns []string) {
 	fmt.Fprintf(os.Stderr, "  port:        %d\n", port)
 	fmt.Fprintf(os.Stderr, "  auto-readme: %v\n", autoReadme)
-	fmt.Fprintf(os.Stderr, "  show-all:    %v\n\n", showAll)
+	fmt.Fprintf(os.Stderr, "  show-all:    %v\n", showAll)
+	if len(ignorePatterns) > 0 {
+		fmt.Fprintf(os.Stderr, "  ignore:      %s\n", strings.Join(ignorePatterns, ", "))
+	}
+	fmt.Fprintln(os.Stderr)
+}
+
+// buildIgnorePatterns merges CLI and YAML ignore patterns.
+// If no patterns from any source, defaults to [".git"].
+func buildIgnorePatterns(flagVal, root string) []string {
+	var patterns []string
+
+	if flagVal != "" {
+		for _, p := range strings.Split(flagVal, ",") {
+			p = strings.TrimSpace(p)
+			if p != "" {
+				patterns = append(patterns, p)
+			}
+		}
+	}
+
+	patterns = append(patterns, loadIgnoreFromConfig(root)...)
+
+	if len(patterns) == 0 {
+		return []string{".git"}
+	}
+	return patterns
+}
+
+// loadIgnoreFromConfig reads the ignore list from .viewmd.yaml.
+func loadIgnoreFromConfig(root string) []string {
+	f, err := os.Open(filepath.Join(root, ".viewmd.yaml"))
+	if err != nil {
+		return nil
+	}
+	defer f.Close()
+
+	var patterns []string
+	inIgnore := false
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := scanner.Text()
+		trimmed := strings.TrimSpace(line)
+
+		if trimmed == "ignore:" {
+			inIgnore = true
+			continue
+		}
+
+		if inIgnore {
+			if strings.HasPrefix(trimmed, "- ") {
+				val := strings.TrimSpace(strings.TrimPrefix(trimmed, "- "))
+				val = strings.Trim(val, `"'`)
+				if val != "" {
+					patterns = append(patterns, val)
+				}
+			} else {
+				inIgnore = false
+			}
+		}
+	}
+	return patterns
 }
 
 // loadShowAllFromConfig reads .viewmd.yaml from root and returns

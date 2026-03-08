@@ -20,9 +20,10 @@ import (
 // Handler serves markdown files, text files, and directory listings
 // from a root directory.
 type Handler struct {
-	root       string
-	AutoReadme bool
-	ShowAll    bool
+	root           string
+	AutoReadme     bool
+	ShowAll        bool
+	IgnorePatterns []string
 }
 
 // New creates a Handler that serves files from the given root directory.

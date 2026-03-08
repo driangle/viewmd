@@ -6,6 +6,39 @@ import (
 	"testing"
 )
 
+func TestIsIgnored(t *testing.T) {
+	tests := []struct {
+		name     string
+		relPath  string
+		patterns []string
+		want     bool
+	}{
+		{".git", ".git", []string{".git"}, true},
+		{"node_modules", "node_modules", []string{"node_modules"}, true},
+		{"README.md", "README.md", []string{".git", "node_modules"}, false},
+		{"build.log", "build.log", []string{"*.log"}, true},
+		{"main.go", "main.go", []string{"*.log"}, false},
+		{".git", ".git", nil, false},
+		{".git", ".git", []string{}, false},
+		{".gitignore", ".gitignore", []string{".git"}, false},
+		// Path-based patterns
+		{"worktrees", ".claude/worktrees", []string{".claude/worktrees"}, true},
+		{"foo.txt", ".claude/worktrees/foo.txt", []string{".claude/worktrees"}, true},
+		{"worktrees", "other/worktrees", []string{".claude/worktrees"}, false},
+		{"release.yml", "docs/release.yml", []string{"docs/*.yml"}, true},
+		{"release.yml", "other/release.yml", []string{"docs/*.yml"}, false},
+		// Doublestar patterns
+		{"test.log", "a/b/test.log", []string{"**/*.log"}, true},
+		{"test.log", "test.log", []string{"**/*.log"}, true},
+		{"test.go", "a/b/test.go", []string{"**/*.log"}, false},
+	}
+	for _, tt := range tests {
+		if got := isIgnored(tt.name, tt.relPath, tt.patterns); got != tt.want {
+			t.Errorf("isIgnored(%q, %q, %v) = %v, want %v", tt.name, tt.relPath, tt.patterns, got, tt.want)
+		}
+	}
+}
+
 func TestIsMarkdownFile(t *testing.T) {
 	tests := []struct {
 		name string

@@ -1,0 +1,9 @@
+ignore:
+  - .git
+  - node_modules
+  - __pycache__
+  - "*.pyc"
+  - .venv
+  - bin
+  - .DS_Store
+  - .claude/worktrees

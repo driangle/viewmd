@@ -439,6 +439,59 @@ func TestShowAllShowsEverything(t *testing.T) {
 	}
 }
 
+func TestIgnorePatternsHideEntries(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "README.md", "# Hi")
+	writeFile(t, dir, "build.log", "log output")
+	os.MkdirAll(filepath.Join(dir, "node_modules"), 0o755)
+	writeFile(t, dir, "node_modules/pkg.js", "module")
+	os.MkdirAll(filepath.Join(dir, ".git"), 0o755)
+	writeFile(t, dir, ".git/config", "git config")
+
+	h := handler.New(dir)
+	h.ShowAll = true
+	h.IgnorePatterns = []string{".git", "node_modules", "*.log"}
+	rec := request(h, "/")
+	body := rec.Body.String()
+
+	if !strings.Contains(body, "README.md") {
+		t.Error("expected README.md to be visible")
+	}
+	if strings.Contains(body, "node_modules") {
+		t.Error("expected node_modules to be hidden")
+	}
+	if strings.Contains(body, ".git") {
+		t.Error("expected .git to be hidden")
+	}
+	if strings.Contains(body, "build.log") {
+		t.Error("expected build.log to be hidden")
+	}
+}
+
+func TestIgnorePatternsApplyToSubdirectories(t *testing.T) {
+	dir := t.TempDir()
+	os.MkdirAll(filepath.Join(dir, "sub"), 0o755)
+	writeFile(t, dir, "sub/keep.md", "# Keep")
+	writeFile(t, dir, "sub/debug.log", "log")
+	os.MkdirAll(filepath.Join(dir, "sub", "node_modules"), 0o755)
+
+	h := handler.New(dir)
+	h.ShowAll = true
+	h.IgnorePatterns = []string{"node_modules", "*.log"}
+	rec := request(h, "/sub")
+	body := rec.Body.String()
+
+	if !strings.Contains(body, "keep.md") {
+		t.Error("expected keep.md to be visible")
+	}
+	if strings.Contains(body, "node_modules") {
+		t.Error("expected node_modules to be hidden in subdirectory")
+	}
+	if strings.Contains(body, "debug.log") {
+		t.Error("expected debug.log to be hidden in subdirectory")
+	}
+}
+
 func TestAutoReadmeStillWorksWithFiltering(t *testing.T) {
 	dir := t.TempDir()
 	os.MkdirAll(filepath.Join(dir, "docs"), 0o755)

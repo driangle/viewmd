@@ -129,12 +129,63 @@ func TestSearchCaseInsensitive(t *testing.T) {
 func TestSearchSkipsHiddenDirs(t *testing.T) {
 	h := handler.New(setupSearchDir(t))
 	h.ShowAll = true
+	h.IgnorePatterns = []string{".git"}
 	resp := searchRequest(h, "q=config&mode=both")
 
 	for _, r := range resp.Results {
 		if r.Name == "config" {
 			t.Error("should not return files from .git directory")
 		}
+	}
+}
+
+func TestSearchRespectsIgnorePatterns(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "visible.md", "# Visible")
+	os.MkdirAll(filepath.Join(dir, "node_modules"), 0o755)
+	writeFile(t, dir, "node_modules/pkg.js", "package code")
+	writeFile(t, dir, "debug.log", "some log data")
+
+	h := handler.New(dir)
+	h.ShowAll = true
+	h.IgnorePatterns = []string{"node_modules", "*.log"}
+	resp := searchRequest(h, "q=&mode=name")
+	// Empty query returns nothing — search with actual term
+	resp = searchRequest(h, "q=pkg&mode=both")
+	for _, r := range resp.Results {
+		if r.Name == "pkg.js" {
+			t.Error("expected pkg.js to be excluded by ignore pattern")
+		}
+	}
+
+	resp = searchRequest(h, "q=debug&mode=both")
+	for _, r := range resp.Results {
+		if r.Name == "debug.log" {
+			t.Error("expected debug.log to be excluded by ignore pattern")
+		}
+	}
+}
+
+func TestSearchRespectsPathIgnorePatterns(t *testing.T) {
+	dir := t.TempDir()
+	os.MkdirAll(filepath.Join(dir, ".claude", "worktrees"), 0o755)
+	writeFile(t, dir, ".claude/worktrees/branch.md", "# Branch")
+	writeFile(t, dir, "visible.md", "# Visible")
+
+	h := handler.New(dir)
+	h.ShowAll = true
+	h.IgnorePatterns = []string{".claude/worktrees"}
+	resp := searchRequest(h, "q=branch&mode=both")
+
+	for _, r := range resp.Results {
+		if r.Name == "branch.md" {
+			t.Error("expected branch.md inside .claude/worktrees to be excluded by path ignore pattern")
+		}
+	}
+
+	resp = searchRequest(h, "q=visible&mode=name")
+	if len(resp.Results) != 1 {
+		t.Errorf("expected 1 result for visible, got %d", len(resp.Results))
 	}
 }
 
@@ -174,6 +225,23 @@ func TestSearchResultLimit(t *testing.T) {
 
 	if len(resp.Results) > 50 {
 		t.Errorf("expected at most 50 results, got %d", len(resp.Results))
+	}
+}
+
+func TestSearchByPath(t *testing.T) {
+	dir := t.TempDir()
+	os.MkdirAll(filepath.Join(dir, ".github", "workflows"), 0o755)
+	writeFile(t, dir, ".github/workflows/release.yml", "name: Release")
+
+	h := handler.New(dir)
+	h.ShowAll = true
+	resp := searchRequest(h, "q=workflows/release&mode=name")
+
+	if len(resp.Results) != 1 {
+		t.Fatalf("expected 1 result for path search, got %d", len(resp.Results))
+	}
+	if resp.Results[0].Path != ".github/workflows/release.yml" {
+		t.Errorf("expected .github/workflows/release.yml, got %s", resp.Results[0].Path)
 	}
 }
 

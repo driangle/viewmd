@@ -52,9 +52,8 @@ func (h *Handler) serveSearch(w http.ResponseWriter, r *http.Request) {
 			return nil
 		}
 
-		// Skip hidden directories
 		name := d.Name()
-		if strings.HasPrefix(name, ".") {
+		if isIgnored(name, relPath, h.IgnorePatterns) {
 			if d.IsDir() {
 				return fs.SkipDir
 			}
@@ -72,8 +71,10 @@ func (h *Handler) serveSearch(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		nameLower := strings.ToLower(name)
+		pathLower := strings.ToLower(filepath.ToSlash(relPath))
 		nameMatch := (mode == "name" || mode == "both") &&
-			strings.Contains(strings.ToLower(name), qLower)
+			(strings.Contains(nameLower, qLower) || strings.Contains(pathLower, qLower))
 
 		var snippet string
 		var contentMatch bool
