@@ -104,7 +104,7 @@ func TestBinaryWithTextExtDoesNotCrash(t *testing.T) {
 // Directory listing
 // ---------------------------------------------------------------------------
 
-func TestRootListsFilesAndSubdirs(t *testing.T) {
+func TestRootListsMarkdownAndDirsWithMarkdown(t *testing.T) {
 	srv := testutil.StartServer(t, map[string]string{
 		"hello.py":       "print('hello')\n",
 		"docs/README.md": "# Docs\n",
@@ -115,14 +115,43 @@ func TestRootListsFilesAndSubdirs(t *testing.T) {
 	os.Mkdir(filepath.Join(srv.TempDir, "empty_dir"), 0o755)
 
 	body := testutil.Get(t, srv.URL, "/")
-	if !strings.Contains(body, "hello.py") {
-		t.Error("expected hello.py in root listing")
-	}
+
+	// Markdown files should appear
 	if !strings.Contains(body, "basic.md") {
 		t.Error("expected basic.md in root listing")
 	}
-	if !strings.Contains(body, "docs/") {
+	// Dirs with markdown should appear
+	if !strings.Contains(body, "docs") {
 		t.Error("expected docs/ subdirectory in root listing")
+	}
+	// Non-markdown files hidden by default
+	if strings.Contains(body, "hello.py") {
+		t.Error("expected hello.py to be hidden by default filtering")
+	}
+	// Empty dirs hidden by default
+	if strings.Contains(body, "empty_dir") {
+		t.Error("expected empty_dir to be hidden by default filtering")
+	}
+}
+
+func TestRootListsAllWithShowAll(t *testing.T) {
+	srv := testutil.StartServerWithShowAll(t, map[string]string{
+		"hello.py":       "print('hello')\n",
+		"docs/README.md": "# Docs\n",
+	})
+	defer srv.Close()
+
+	os.Mkdir(filepath.Join(srv.TempDir, "empty_dir"), 0o755)
+
+	body := testutil.Get(t, srv.URL, "/")
+	if !strings.Contains(body, "hello.py") {
+		t.Error("expected hello.py in root listing with ShowAll")
+	}
+	if !strings.Contains(body, "basic.md") {
+		t.Error("expected basic.md in root listing with ShowAll")
+	}
+	if !strings.Contains(body, "docs") {
+		t.Error("expected docs/ in root listing with ShowAll")
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -53,5 +54,34 @@ func TestPortInUseMessage(t *testing.T) {
 	_, err = net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err == nil {
 		t.Fatal("expected port-in-use error")
+	}
+}
+
+func TestLoadShowAllFromConfig(t *testing.T) {
+	tests := []struct {
+		name    string
+		content string
+		want    bool
+	}{
+		{"true value", "show_all_files: true\n", true},
+		{"false value", "show_all_files: false\n", false},
+		{"no such key", "other_key: true\n", false},
+		{"empty file", "", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+			os.WriteFile(filepath.Join(dir, ".viewmd.yaml"), []byte(tt.content), 0o644)
+			if got := loadShowAllFromConfig(dir); got != tt.want {
+				t.Errorf("loadShowAllFromConfig() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestLoadShowAllFromConfigMissingFile(t *testing.T) {
+	dir := t.TempDir()
+	if got := loadShowAllFromConfig(dir); got != false {
+		t.Errorf("expected false when config file missing, got %v", got)
 	}
 }

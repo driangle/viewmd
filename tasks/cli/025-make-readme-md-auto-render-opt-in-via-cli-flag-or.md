@@ -1,7 +1,7 @@
 ---
 title: "Make README.md auto-render opt-in via CLI flag or config"
 id: "025"
-status: in-progress
+status: completed
 priority: medium
 type: feature
 tags: ["config", "navigation"]
@@ -16,11 +16,11 @@ Currently, navigating to a directory that contains a `README.md` automatically r
 
 ## Tasks
 
-- [ ] Remove the automatic README.md redirect from `serveDirectoryListing` / `ServeHTTP` in `handler.go`
-- [ ] Add a CLI flag (e.g. `--auto-readme`) to opt into auto-rendering README.md in directories
-- [ ] Wire the flag through to the handler (e.g. as a field on `Handler`)
-- [ ] Update existing tests that rely on the README auto-serve behavior
-- [ ] Add tests for both default (no auto-render) and opt-in (auto-render) modes
+- [x] Remove the automatic README.md redirect from `serveDirectoryListing` / `ServeHTTP` in `handler.go`
+- [x] Add a CLI flag (e.g. `--auto-readme`) to opt into auto-rendering README.md in directories
+- [x] Wire the flag through to the handler (e.g. as a field on `Handler`)
+- [x] Update existing tests that rely on the README auto-serve behavior
+- [x] Add tests for both default (no auto-render) and opt-in (auto-render) modes
 
 ## Acceptance Criteria
 

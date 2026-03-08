@@ -50,11 +50,12 @@ func TestFrontmatterHTMLEscaping(t *testing.T) {
 
 	body := testutil.Get(t, srv.URL, "/escaping.md")
 
-	if strings.Contains(body, "<script>") {
-		t.Error("expected no raw <script> tags in response")
+	xssPayload := `<script>alert("xss")</script>`
+	if strings.Contains(body, xssPayload) {
+		t.Error("expected frontmatter XSS payload to be escaped")
 	}
 
-	escaped := html.EscapeString(`<script>alert("xss")</script>`)
+	escaped := html.EscapeString(xssPayload)
 	if !strings.Contains(body, escaped) {
 		t.Errorf("expected escaped script tag %q in body", escaped)
 	}

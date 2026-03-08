@@ -5,6 +5,7 @@ status: pending
 priority: medium
 type: feature
 tags: ["docs", "vitepress"]
+touches: ["docs"]
 created: "2026-03-07"
 ---
 

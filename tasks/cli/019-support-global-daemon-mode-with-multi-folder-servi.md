@@ -5,6 +5,7 @@ status: pending
 priority: medium
 type: feature
 tags: ["cli", "server"]
+touches: ["cli/cmd", "cli/handler"]
 created: "2026-03-07"
 ---
 

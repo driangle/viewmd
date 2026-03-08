@@ -106,7 +106,7 @@ func TestTextFileServed(t *testing.T) {
 	if !strings.Contains(body, "print(") {
 		t.Error("expected text file content")
 	}
-	if !strings.Contains(body, `<div class="header">script.py</div>`) {
+	if !strings.Contains(body, `<span>script.py</span>`) {
 		t.Error("expected filename shown in header")
 	}
 	if !strings.Contains(body, "<pre>") {
@@ -196,10 +196,12 @@ func TestMissingFileReturns404(t *testing.T) {
 
 func TestDirectoryListingSortOrder(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, "zebra.txt", "z")
-	writeFile(t, dir, "alpha.txt", "a")
+	writeFile(t, dir, "zebra.md", "# Z")
+	writeFile(t, dir, "alpha.md", "# A")
 	os.MkdirAll(filepath.Join(dir, "beta_dir"), 0o755)
+	writeFile(t, dir, "beta_dir/x.md", "# X")
 	os.MkdirAll(filepath.Join(dir, "alpha_dir"), 0o755)
+	writeFile(t, dir, "alpha_dir/y.md", "# Y")
 
 	h := handler.New(dir)
 	rec := request(h, "/")
@@ -208,8 +210,8 @@ func TestDirectoryListingSortOrder(t *testing.T) {
 	// Dirs should come before files
 	alphaDirPos := strings.Index(body, "alpha_dir")
 	betaDirPos := strings.Index(body, "beta_dir")
-	alphaPos := strings.Index(body, "alpha.txt")
-	zebraPos := strings.Index(body, "zebra.txt")
+	alphaPos := strings.Index(body, "alpha.md")
+	zebraPos := strings.Index(body, "zebra.md")
 
 	if alphaDirPos > betaDirPos {
 		t.Error("alpha_dir should come before beta_dir")
@@ -218,7 +220,7 @@ func TestDirectoryListingSortOrder(t *testing.T) {
 		t.Error("directories should come before files")
 	}
 	if alphaPos > zebraPos {
-		t.Error("alpha.txt should come before zebra.txt")
+		t.Error("alpha.md should come before zebra.md")
 	}
 }
 
@@ -351,5 +353,90 @@ func TestTrailingSlashDirectoryParentLink(t *testing.T) {
 	// Hrefs should not have double slashes
 	if strings.Contains(body, "//") {
 		t.Error("directory listing should not contain double slashes in hrefs")
+	}
+}
+
+func TestDefaultFilteringHidesNonMarkdown(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "readme.md", "# Hi")
+	writeFile(t, dir, "script.py", "print('hello')")
+	writeFile(t, dir, "data.json", "{}")
+
+	h := handler.New(dir)
+	rec := request(h, "/")
+	body := rec.Body.String()
+
+	if !strings.Contains(body, "readme.md") {
+		t.Error("expected readme.md to be visible")
+	}
+	if strings.Contains(body, "script.py") {
+		t.Error("expected script.py to be hidden by default")
+	}
+	if strings.Contains(body, "data.json") {
+		t.Error("expected data.json to be hidden by default")
+	}
+}
+
+func TestDefaultFilteringHidesEmptyDirs(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "doc.md", "# Doc")
+	os.MkdirAll(filepath.Join(dir, "empty"), 0o755)
+	os.MkdirAll(filepath.Join(dir, "has-md"), 0o755)
+	writeFile(t, dir, "has-md/page.md", "# Page")
+	os.MkdirAll(filepath.Join(dir, "no-md"), 0o755)
+	writeFile(t, dir, "no-md/script.py", "x")
+
+	h := handler.New(dir)
+	rec := request(h, "/")
+	body := rec.Body.String()
+
+	if !strings.Contains(body, "has-md") {
+		t.Error("expected has-md directory to be visible")
+	}
+	if strings.Contains(body, "empty") {
+		t.Error("expected empty directory to be hidden")
+	}
+	if strings.Contains(body, "no-md") {
+		t.Error("expected no-md directory to be hidden")
+	}
+}
+
+func TestShowAllShowsEverything(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "readme.md", "# Hi")
+	writeFile(t, dir, "script.py", "print('hello')")
+	os.MkdirAll(filepath.Join(dir, "empty"), 0o755)
+
+	h := handler.New(dir)
+	h.ShowAll = true
+	rec := request(h, "/")
+	body := rec.Body.String()
+
+	if !strings.Contains(body, "readme.md") {
+		t.Error("expected readme.md to be visible")
+	}
+	if !strings.Contains(body, "script.py") {
+		t.Error("expected script.py to be visible with ShowAll")
+	}
+	if !strings.Contains(body, "empty") {
+		t.Error("expected empty directory to be visible with ShowAll")
+	}
+}
+
+func TestAutoReadmeStillWorksWithFiltering(t *testing.T) {
+	dir := t.TempDir()
+	os.MkdirAll(filepath.Join(dir, "docs"), 0o755)
+	writeFile(t, dir, "docs/README.md", "# Auto Readme")
+
+	h := handler.New(dir)
+	h.AutoReadme = true
+	rec := request(h, "/docs")
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("got status %d, want 200", rec.Code)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "Auto Readme") {
+		t.Error("expected README.md content with AutoReadme enabled")
 	}
 }

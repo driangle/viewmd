@@ -1,1 +1,34 @@
 dir: ./tasks
+
+scopes:
+  cli/cmd:
+    paths:
+      - "apps/cli/cmd/viewmd/"
+    description: "CLI entry point, argument parsing, server startup"
+  cli/handler:
+    paths:
+      - "apps/cli/internal/handler/"
+    description: "HTTP request handler, routing, and directory listing"
+  cli/render:
+    paths:
+      - "apps/cli/internal/render/"
+    description: "HTML templates, CSS, and client-side JavaScript"
+  ci:
+    paths:
+      - ".github/workflows/"
+    description: "GitHub Actions CI/CD workflows"
+  docs:
+    paths:
+      - "docs/"
+    description: "VitePress documentation site"
+  python:
+    paths:
+      - "viewmd.py"
+      - "tests/"
+      - "pyproject.toml"
+    description: "Python CLI source, tests, and packaging"
+  root-docs:
+    paths:
+      - "README.md"
+      - "CLAUDE.md"
+    description: "Root-level documentation and project metadata"

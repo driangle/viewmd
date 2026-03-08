@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"flag"
@@ -9,7 +10,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"syscall"
 
 	"github.com/driangle/viewmd/apps/cli/internal/handler"
@@ -22,6 +25,8 @@ func main() {
 	render.Version = version
 
 	autoReadme := flag.Bool("auto-readme", false, "Auto-render README.md in directories")
+	showAll := flag.Bool("show-all", false, "Show all files, not just Markdown (shorthand: -a)")
+	flag.BoolVar(showAll, "a", false, "Show all files, not just Markdown")
 	ver := flag.Bool("version", false, "Print version and exit")
 	flag.Parse()
 
@@ -52,6 +57,7 @@ func main() {
 	root, _ := os.Getwd()
 	h := handler.New(root)
 	h.AutoReadme = *autoReadme
+	h.ShowAll = *showAll || loadShowAllFromConfig(root)
 	srv := &http.Server{Handler: h}
 
 	done := make(chan os.Signal, 1)
@@ -82,4 +88,25 @@ func printBanner(port int) {
 	fmt.Println(sep)
 	fmt.Println("Press Ctrl+C to stop")
 	fmt.Println()
+}
+
+// loadShowAllFromConfig reads .viewmd.yaml from root and returns
+// the show_all_files value. Returns false if the file doesn't exist
+// or can't be parsed.
+func loadShowAllFromConfig(root string) bool {
+	f, err := os.Open(filepath.Join(root, ".viewmd.yaml"))
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if strings.HasPrefix(line, "show_all_files:") {
+			val := strings.TrimSpace(strings.TrimPrefix(line, "show_all_files:"))
+			return val == "true"
+		}
+	}
+	return false
 }

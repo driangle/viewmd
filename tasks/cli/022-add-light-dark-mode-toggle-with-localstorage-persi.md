@@ -5,6 +5,7 @@ status: pending
 priority: low
 type: feature
 tags: ["ui", "theme"]
+touches: ["cli/render"]
 created: "2026-03-07"
 ---
 

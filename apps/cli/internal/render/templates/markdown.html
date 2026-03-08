@@ -24,13 +24,29 @@
         .parent-nav { font-size: 0.85em; margin-bottom: 12px; }
         .parent-nav a { color: #586069; }
         .parent-nav a:hover { color: #0066cc; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .copy-btn { background: #f4f4f4; border: 1px solid #ddd; border-radius: 4px; padding: 4px 10px; font-size: 0.8em; cursor: pointer; color: #586069; font-family: inherit; }
+        .copy-btn:hover { background: #e8e8e8; color: #333; }
     </style>
 </head>
 <body>
-    <div class="parent-nav"><a href="{{.ParentHref}}">..</a></div>
+    <div class="top-bar">
+        <div class="parent-nav"><a href="{{.ParentHref}}">..</a></div>
+        <button class="copy-btn" onclick="copyRaw(this)">Copy</button>
+    </div>
     {{if .Frontmatter}}<div class="frontmatter"><table>{{range .FrontmatterRows}}<tr><td class="fm-key">{{.Key}}</td><td>{{.Value}}</td></tr>
 {{end}}</table></div>
 {{end}}{{.BodyHTML}}
+    <textarea id="raw-content" style="display:none;">{{.RawContent}}</textarea>
+    <script>
+    function copyRaw(btn) {
+        var text = document.getElementById('raw-content').value;
+        navigator.clipboard.writeText(text).then(function() {
+            btn.textContent = 'Copied!';
+            setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
+        });
+    }
+    </script>
     <footer style="margin-top:40px;padding-top:8px;border-top:1px solid #eee;font-size:0.75em;color:#999;">viewmd {{.Version}}</footer>
 </body>
 </html>

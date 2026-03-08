@@ -23,6 +23,7 @@ import (
 type Handler struct {
 	root       string
 	AutoReadme bool
+	ShowAll    bool
 }
 
 // New creates a Handler that serves files from the given root directory.
@@ -115,9 +116,10 @@ func serveTextFile(w http.ResponseWriter, r *http.Request, filePath string, pare
 		return
 	}
 
-	escaped := html.EscapeString(string(content))
+	raw := string(content)
+	escaped := html.EscapeString(raw)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := render.RenderTextPage(w, filepath.Base(filePath), escaped, parentHref); err != nil {
+	if err := render.RenderTextPage(w, filepath.Base(filePath), escaped, parentHref, raw); err != nil {
 		http.Error(w, fmt.Sprintf("Error rendering page: %v", err),
 			http.StatusInternalServerError)
 	}

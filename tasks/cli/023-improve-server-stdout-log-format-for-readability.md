@@ -5,6 +5,7 @@ status: pending
 priority: low
 type: chore
 tags: ["logging", "dx"]
+touches: ["cli/cmd", "cli/handler"]
 created: "2026-03-07"
 ---
 

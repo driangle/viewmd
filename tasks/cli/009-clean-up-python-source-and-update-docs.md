@@ -5,6 +5,7 @@ status: pending
 priority: low
 dependencies: ["008"]
 tags: ["cleanup"]
+touches: ["python", "root-docs"]
 created: 2026-03-07
 ---
 

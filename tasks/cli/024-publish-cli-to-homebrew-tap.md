@@ -5,6 +5,7 @@ status: pending
 priority: medium
 type: chore
 tags: ["release", "homebrew"]
+touches: ["ci"]
 created: "2026-03-07"
 ---
 

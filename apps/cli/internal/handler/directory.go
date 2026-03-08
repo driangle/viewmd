@@ -22,6 +22,10 @@ func (h *Handler) serveDirectoryListing(w http.ResponseWriter, _ *http.Request, 
 		return
 	}
 
+	if !h.ShowAll {
+		entries = filterMarkdownEntries(fullPath, entries)
+	}
+
 	sort.Slice(entries, func(i, j int) bool {
 		iDir := entries[i].IsDir()
 		jDir := entries[j].IsDir()
@@ -58,4 +62,45 @@ func (h *Handler) serveDirectoryListing(w http.ResponseWriter, _ *http.Request, 
 		http.Error(w, fmt.Sprintf("Error rendering page: %v", err),
 			http.StatusInternalServerError)
 	}
+}
+
+// filterMarkdownEntries returns only markdown files and directories
+// that contain at least one markdown file recursively.
+func filterMarkdownEntries(dirPath string, entries []os.DirEntry) []os.DirEntry {
+	filtered := make([]os.DirEntry, 0, len(entries))
+	for _, e := range entries {
+		if e.IsDir() {
+			if hasMarkdownFiles(filepath.Join(dirPath, e.Name())) {
+				filtered = append(filtered, e)
+			}
+		} else if isMarkdownFile(e.Name()) {
+			filtered = append(filtered, e)
+		}
+	}
+	return filtered
+}
+
+// isMarkdownFile returns true if the filename has a .md or .markdown extension.
+func isMarkdownFile(name string) bool {
+	ext := strings.ToLower(filepath.Ext(name))
+	return ext == ".md" || ext == ".markdown"
+}
+
+// hasMarkdownFiles returns true if the directory at path contains
+// at least one markdown file, searching recursively.
+func hasMarkdownFiles(path string) bool {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return false
+	}
+	for _, e := range entries {
+		if e.IsDir() {
+			if hasMarkdownFiles(filepath.Join(path, e.Name())) {
+				return true
+			}
+		} else if isMarkdownFile(e.Name()) {
+			return true
+		}
+	}
+	return false
 }

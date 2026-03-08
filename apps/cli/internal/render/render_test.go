@@ -11,7 +11,7 @@ import (
 func TestMarkdownPageWithFrontmatter(t *testing.T) {
 	var buf bytes.Buffer
 	fm := map[string]string{"title": "Hello", "author": "Alice"}
-	err := render.RenderMarkdownPage(&buf, "test.md", fm, "<p>Body</p>", "/", "/")
+	err := render.RenderMarkdownPage(&buf, "test.md", fm, "<p>Body</p>", "/", "/", "# Body")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -30,7 +30,7 @@ func TestMarkdownPageWithFrontmatter(t *testing.T) {
 
 func TestMarkdownPageWithoutFrontmatter(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderMarkdownPage(&buf, "test.md", nil, "<p>Body</p>", "/", "/")
+	err := render.RenderMarkdownPage(&buf, "test.md", nil, "<p>Body</p>", "/", "/", "Body")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -46,7 +46,7 @@ func TestMarkdownPageWithoutFrontmatter(t *testing.T) {
 
 func TestMarkdownPageBaseHref(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderMarkdownPage(&buf, "doc.md", nil, "<p>hi</p>", "/docs/", "/docs/")
+	err := render.RenderMarkdownPage(&buf, "doc.md", nil, "<p>hi</p>", "/docs/", "/docs/", "hi")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -59,7 +59,7 @@ func TestMarkdownPageBaseHref(t *testing.T) {
 
 func TestMarkdownPageEscapesFileName(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderMarkdownPage(&buf, "<script>alert(1)</script>", nil, "<p>ok</p>", "/", "/")
+	err := render.RenderMarkdownPage(&buf, "<script>alert(1)</script>", nil, "<p>ok</p>", "/", "/", "ok")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -76,7 +76,7 @@ func TestMarkdownPageEscapesFileName(t *testing.T) {
 func TestMarkdownPageEscapesFrontmatterValues(t *testing.T) {
 	var buf bytes.Buffer
 	fm := map[string]string{"key": "<b>bold</b>"}
-	err := render.RenderMarkdownPage(&buf, "test.md", fm, "<p>ok</p>", "/", "/")
+	err := render.RenderMarkdownPage(&buf, "test.md", fm, "<p>ok</p>", "/", "/", "ok")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -92,14 +92,14 @@ func TestMarkdownPageEscapesFrontmatterValues(t *testing.T) {
 
 func TestTextPage(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderTextPage(&buf, "main.go", "package main\n", "/")
+	err := render.RenderTextPage(&buf, "main.go", "package main\n", "/", "package main\n")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	out := buf.String()
 
-	if !strings.Contains(out, `<div class="header">main.go</div>`) {
-		t.Error("expected file name in header div")
+	if !strings.Contains(out, `<span>main.go</span>`) {
+		t.Error("expected file name in header span")
 	}
 	if !strings.Contains(out, "<pre>package main\n</pre>") {
 		t.Error("expected content in pre block")
@@ -108,7 +108,7 @@ func TestTextPage(t *testing.T) {
 
 func TestTextPageEscapesFileName(t *testing.T) {
 	var buf bytes.Buffer
-	err := render.RenderTextPage(&buf, "<img src=x>", "content", "/")
+	err := render.RenderTextPage(&buf, "<img src=x>", "content", "/", "content")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -160,7 +160,7 @@ func TestMarkdownPageParentNav(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var buf bytes.Buffer
-			err := render.RenderMarkdownPage(&buf, "f.md", nil, "<p>ok</p>", "/", tt.parentHref)
+			err := render.RenderMarkdownPage(&buf, "f.md", nil, "<p>ok</p>", "/", tt.parentHref, "ok")
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -189,7 +189,7 @@ func TestTextPageParentNav(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var buf bytes.Buffer
-			err := render.RenderTextPage(&buf, "main.go", "code", tt.parentHref)
+			err := render.RenderTextPage(&buf, "main.go", "code", tt.parentHref, "code")
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}

@@ -5,6 +5,7 @@ status: pending
 priority: medium
 dependencies: ["007"]
 tags: ["go", "ci"]
+touches: ["ci"]
 created: 2026-03-07
 ---
 

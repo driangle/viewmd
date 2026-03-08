@@ -5,6 +5,7 @@ status: pending
 priority: low
 type: feature
 tags: ["ui", "config"]
+touches: ["cli/cmd", "cli/handler", "cli/render"]
 created: "2026-03-07"
 ---
 

@@ -12,12 +12,25 @@
         .parent-nav { font-size: 0.85em; margin-bottom: 8px; }
         .parent-nav a { color: #586069; text-decoration: none; }
         .parent-nav a:hover { color: #0066cc; text-decoration: underline; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        .copy-btn { background: #f4f4f4; border: 1px solid #d0d7de; border-radius: 4px; padding: 4px 10px; font-size: 0.8em; cursor: pointer; color: #586069; font-family: inherit; }
+        .copy-btn:hover { background: #e8e8e8; color: #333; }
     </style>
 </head>
 <body>
     <div class="parent-nav"><a href="{{.ParentHref}}">..</a></div>
-    <div class="header">{{.FileName}}</div>
+    <div class="header"><span>{{.FileName}}</span><button class="copy-btn" onclick="copyRaw(this)">Copy</button></div>
     <div class="content"><pre>{{.Content}}</pre></div>
+    <textarea id="raw-content" style="display:none;">{{.RawContent}}</textarea>
+    <script>
+    function copyRaw(btn) {
+        var text = document.getElementById('raw-content').value;
+        navigator.clipboard.writeText(text).then(function() {
+            btn.textContent = 'Copied!';
+            setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
+        });
+    }
+    </script>
     <footer style="margin-top:12px;font-size:0.75em;color:#999;">viewmd {{.Version}}</footer>
 </body>
 </html>

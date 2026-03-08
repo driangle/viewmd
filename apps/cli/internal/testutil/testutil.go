@@ -75,6 +75,50 @@ func StartServer(t *testing.T, extra map[string]string) *Server {
 	}
 }
 
+// StartServerWithShowAll is like StartServer but sets ShowAll = true
+// on the handler, showing all files in directory listings.
+func StartServerWithShowAll(t *testing.T, extra map[string]string) *Server {
+	t.Helper()
+
+	tmpDir, err := os.MkdirTemp("", "viewmd-test-*")
+	if err != nil {
+		t.Fatalf("creating temp dir: %v", err)
+	}
+
+	copyFixtures(t, tmpDir)
+
+	for relPath, content := range extra {
+		full := filepath.Join(tmpDir, relPath)
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatalf("creating dir for %s: %v", relPath, err)
+		}
+		if err := os.WriteFile(full, []byte(content), 0o644); err != nil {
+			t.Fatalf("writing extra file %s: %v", relPath, err)
+		}
+	}
+
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listening on random port: %v", err)
+	}
+
+	h := handler.New(tmpDir)
+	h.ShowAll = true
+	srv := &http.Server{Handler: h}
+	go srv.Serve(listener)
+
+	baseURL := fmt.Sprintf("http://127.0.0.1:%d", listener.Addr().(*net.TCPAddr).Port)
+
+	return &Server{
+		URL:     baseURL,
+		TempDir: tmpDir,
+		close: func() {
+			srv.Close()
+			os.RemoveAll(tmpDir)
+		},
+	}
+}
+
 // Get fetches baseURL+path and returns the response body as a string.
 func Get(t *testing.T, baseURL, path string) string {
 	t.Helper()

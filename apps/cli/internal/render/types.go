@@ -16,6 +16,7 @@ type markdownData struct {
 	Frontmatter     map[string]string
 	FrontmatterRows []FrontmatterRow
 	BodyHTML        template.HTML
+	RawContent      string
 	Version         string
 }
 
@@ -24,6 +25,7 @@ type textData struct {
 	FileName   string
 	ParentHref string
 	Content    template.HTML
+	RawContent string
 	Version    string
 }
 
