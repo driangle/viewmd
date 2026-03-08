@@ -4,7 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-viewmd is a tool for viewing Markdown files in the browser. It started as a Python CLI (`viewmd.py`) and is being rewritten in Go (`apps/cli/`). Both coexist during migration.
+viewmd is a minimal file viewer for the browser. It started as a Python CLI (`viewmd.py`) and is being rewritten in Go (`apps/cli/`). Both coexist during migration.
+
+**Design principle: View everything, render what you can, manage nothing.**
+
+viewmd is not a file manager — it doesn't upload, edit, rename, or delete. It's a read-only viewer that renders each file type as nicely as possible:
+- **Markdown** — full rendered HTML (core value)
+- **Code/text** — syntax-highlighted display
+- **Images** — inline rendering
+- **Directories** — clean listing with README auto-display
+- **Other files** — listed in directories, download or "can't preview" on open
 
 ## Monorepo Structure
 

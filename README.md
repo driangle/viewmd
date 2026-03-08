@@ -1,6 +1,8 @@
 # viewmd
 
-A simple HTTP server for viewing Markdown files in your browser.
+A minimal file viewer for your browser. Point it at a directory and browse everything — markdown rendered beautifully, code syntax-highlighted, images inline.
+
+**View everything, render what you can, manage nothing.**
 
 ## Installation
 

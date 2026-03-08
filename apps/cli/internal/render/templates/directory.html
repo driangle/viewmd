@@ -5,14 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Directory listing</title>
     <style>
-        body { max-width: 800px; margin: 40px auto; padding: 0 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        ul { list-style: none; padding: 0; }
-        li { margin: 8px 0; }
-        a { text-decoration: none; color: #0066cc; }
-        a:hover { text-decoration: underline; }
-        li.kb-active { background: #e8f0fe; border-radius: 4px; padding: 2px 6px; margin-left: -6px; }
-        li.kb-active a { color: #1a4d99; font-weight: 600; }
-        .kb-hint { margin-top: 24px; font-size: 0.75em; color: #999; }
+        :root {
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+            --color-text: #24292f;
+            --color-text-secondary: #656d76;
+            --color-link: #0969da;
+            --color-bg: #ffffff;
+            --color-bg-subtle: #f6f8fa;
+            --color-border: #d0d7de;
+            --color-border-light: #e8ecf0;
+            --color-accent-bg: #ddf4ff;
+            --color-accent-text: #0550ae;
+            --radius: 6px;
+            --max-width: 860px;
+        }
+        body { max-width: var(--max-width); margin: 40px auto; padding: 0 20px; font-family: var(--font-sans); color: var(--color-text); }
+        h1 { font-size: 1.25em; font-weight: 600; color: var(--color-text); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border-light); }
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { margin: 0; }
+        li a { display: block; padding: 6px 10px; border-radius: var(--radius); text-decoration: none; color: var(--color-link); transition: background 0.1s; }
+        li a:hover { background: var(--color-bg-subtle); }
+        li a.dir::before { content: '📁 '; }
+        li a.file::before { content: '📄 '; }
+        li a[data-parent]::before { content: '⬆️ '; }
+        li:first-child:has(a[data-parent]) { margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px solid var(--color-border-light); }
+        li.kb-active { background: var(--color-accent-bg); border-radius: var(--radius); }
+        li.kb-active a { color: var(--color-accent-text); font-weight: 600; }
+        .kb-hint { margin-top: 24px; font-size: 0.75em; color: var(--color-text-secondary); letter-spacing: 0.01em; }
+        footer { margin-top: 40px; padding-top: 8px; border-top: 1px solid var(--color-border-light); font-size: 0.75em; color: var(--color-text-secondary); }
     </style>
 </head>
 <body>
@@ -22,7 +43,7 @@
 {{end}}{{range .Items}}<li><a href="/{{.Href}}" class="{{.CSSClass}}">{{.Label}}</a></li>
 {{end}}    </ul>
     <div class="kb-hint">&#x2191;&#x2193; navigate &middot; Enter/&#x2192; open &middot; &#x2190; back</div>
-    <footer style="margin-top:40px;padding-top:8px;border-top:1px solid #eee;font-size:0.75em;color:#999;">viewmd {{.Version}}</footer>
+    <footer>viewmd {{.Version}}</footer>
     <script>
     (function() {
         var items = document.querySelectorAll('#file-list li');
