@@ -1,7 +1,7 @@
 ---
 title: "Add inline image viewing"
 id: "032"
-status: in-progress
+status: completed
 priority: medium
 type: feature
 tags: ["feature"]
@@ -17,12 +17,12 @@ When a user clicks on an image file (PNG, JPG, GIF, SVG, WebP, etc.) in a direct
 
 ## Tasks
 
-- [ ] Add image file extension detection to the classify package
-- [ ] Create an image rendering template/page
-- [ ] Serve image files with correct Content-Type when accessed directly
-- [ ] Route image file requests to the image viewer page
+- [x] Add image file extension detection to the classify package
+- [x] Create an image rendering template/page
+- [x] Serve image files with correct Content-Type when accessed directly
+- [x] Route image file requests to the image viewer page
 - [ ] Show image thumbnails or icons in directory listings (optional)
-- [ ] Test with common formats: PNG, JPG, GIF, SVG, WebP
+- [x] Test with common formats: PNG, JPG, GIF, SVG, WebP
 
 ## Acceptance Criteria
 
