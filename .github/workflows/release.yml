@@ -35,13 +35,103 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
+          VERSION: ${{ github.event.release.tag_name }}
         run: |
           ext=""
           if [ "$GOOS" = "windows" ]; then ext=".exe"; fi
-          go build -o viewmd-${GOOS}-${GOARCH}${ext} ./cmd/viewmd
-      - name: Upload binary to release
+          binary="viewmd-${GOOS}-${GOARCH}${ext}"
+          go build -ldflags "-X main.version=${VERSION#v}" -o "$binary" ./cmd/viewmd
+          tar czf "viewmd-${VERSION}-${GOOS}-${GOARCH}.tar.gz" "$binary"
+          sha256sum "viewmd-${VERSION}-${GOOS}-${GOARCH}.tar.gz" > "viewmd-${VERSION}-${GOOS}-${GOARCH}.tar.gz.sha256"
+      - name: Upload assets to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ github.event.release.tag_name }}
         run: |
           cd apps/cli
-          gh release upload "${{ github.event.release.tag_name }}" viewmd-*
+          gh release upload "$VERSION" viewmd-${VERSION}-*.tar.gz viewmd-${VERSION}-*.sha256
+
+  update-homebrew:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Homebrew formula
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          VERSION: ${{ github.event.release.tag_name }}
+        run: |
+          ver="${VERSION#v}"
+          base_url="https://github.com/driangle/viewmd/releases/download/${VERSION}"
+
+          # Download checksums
+          for platform in darwin-amd64 darwin-arm64 linux-amd64 linux-arm64; do
+            gh release download "$VERSION" \
+              --repo driangle/viewmd \
+              --pattern "viewmd-${VERSION}-${platform}.tar.gz.sha256"
+          done
+
+          # Extract SHA256 values
+          sha_darwin_arm64=$(awk '{print $1}' "viewmd-${VERSION}-darwin-arm64.tar.gz.sha256")
+          sha_darwin_amd64=$(awk '{print $1}' "viewmd-${VERSION}-darwin-amd64.tar.gz.sha256")
+          sha_linux_arm64=$(awk '{print $1}' "viewmd-${VERSION}-linux-arm64.tar.gz.sha256")
+          sha_linux_amd64=$(awk '{print $1}' "viewmd-${VERSION}-linux-amd64.tar.gz.sha256")
+
+          # Generate formula
+          cat > viewmd.rb << FORMULA
+          class Viewmd < Formula
+            desc "Minimal file viewer for the browser — renders markdown, code, images, and directories"
+            homepage "https://github.com/driangle/viewmd"
+            version "${ver}"
+            license "MIT"
+
+            on_macos do
+              on_arm do
+                url "${base_url}/viewmd-${VERSION}-darwin-arm64.tar.gz"
+                sha256 "${sha_darwin_arm64}"
+              end
+              on_intel do
+                url "${base_url}/viewmd-${VERSION}-darwin-amd64.tar.gz"
+                sha256 "${sha_darwin_amd64}"
+              end
+            end
+
+            on_linux do
+              on_arm do
+                url "${base_url}/viewmd-${VERSION}-linux-arm64.tar.gz"
+                sha256 "${sha_linux_arm64}"
+              end
+              on_intel do
+                url "${base_url}/viewmd-${VERSION}-linux-amd64.tar.gz"
+                sha256 "${sha_linux_amd64}"
+              end
+            end
+
+            def install
+              bin.install "viewmd-darwin-arm64" => "viewmd" if OS.mac? && Hardware::CPU.arm?
+              bin.install "viewmd-darwin-amd64" => "viewmd" if OS.mac? && Hardware::CPU.intel?
+              bin.install "viewmd-linux-arm64" => "viewmd" if OS.linux? && Hardware::CPU.arm?
+              bin.install "viewmd-linux-amd64" => "viewmd" if OS.linux? && Hardware::CPU.intel?
+            end
+
+            test do
+              assert_match version.to_s, shell_output("#{bin}/viewmd --version")
+            end
+          end
+          FORMULA
+
+          # Remove leading whitespace from heredoc
+          sed -i 's/^          //' viewmd.rb
+
+          # Push to homebrew-tap repo
+          gh api repos/driangle/homebrew-tap/contents/Formula/viewmd.rb \
+            --method PUT \
+            --field message="Update viewmd to ${ver}" \
+            --field content="$(base64 -w 0 viewmd.rb)" \
+            --field branch=main \
+            $(
+              # Include SHA if file already exists (update vs create)
+              existing_sha=$(gh api repos/driangle/homebrew-tap/contents/Formula/viewmd.rb --jq '.sha' 2>/dev/null || true)
+              if [ -n "$existing_sha" ]; then
+                echo "--field sha=${existing_sha}"
+              fi
+            )

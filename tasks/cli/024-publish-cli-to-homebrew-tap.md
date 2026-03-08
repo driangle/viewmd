@@ -1,7 +1,7 @@
 ---
 title: "Publish CLI to Homebrew tap"
 id: "024"
-status: pending
+status: in-progress
 priority: medium
 type: chore
 tags: ["release", "homebrew"]
@@ -17,14 +17,14 @@ Publish the Go CLI as a Homebrew formula in the existing tap at [driangle/homebr
 
 ## Tasks
 
-- [ ] Set up cross-platform Go binary builds (macOS amd64/arm64, Linux amd64) via GitHub Actions or GoReleaser
-- [ ] Create a GitHub release workflow that builds binaries and attaches them as release assets
-- [ ] Write the Homebrew formula (`Formula/viewmd.rb`) in the `driangle/homebrew-tap` repo
-- [ ] Formula should download the correct binary for the user's platform and architecture
-- [ ] Include SHA256 checksums for each binary in the formula
-- [ ] Add a CI step or script to auto-update the formula on new releases (update URL, version, SHA256)
+- [x] Set up cross-platform Go binary builds (macOS amd64/arm64, Linux amd64) via GitHub Actions or GoReleaser
+- [x] Create a GitHub release workflow that builds binaries and attaches them as release assets
+- [x] Write the Homebrew formula (`Formula/viewmd.rb`) in the `driangle/homebrew-tap` repo
+- [x] Formula should download the correct binary for the user's platform and architecture
+- [x] Include SHA256 checksums for each binary in the formula
+- [x] Add a CI step or script to auto-update the formula on new releases (update URL, version, SHA256)
 - [ ] Test `brew install driangle/tap/viewmd` and `brew upgrade` on macOS
-- [ ] Document installation via Homebrew in the project README
+- [x] Document installation via Homebrew in the project README
 
 ## Acceptance Criteria
 

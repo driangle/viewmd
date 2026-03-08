@@ -6,10 +6,16 @@ A minimal file viewer for your browser. Point it at a directory and browse every
 
 ## Installation
 
+### Homebrew (macOS / Linux)
+
+```bash
+brew install driangle/tap/viewmd
+```
+
 ### From source
 
 ```bash
-go install github.com/user/viewmd/apps/cli/cmd/viewmd@latest
+go install github.com/driangle/viewmd/apps/cli/cmd/viewmd@latest
 ```
 
 ### Build locally
