@@ -1,7 +1,7 @@
 ---
 title: "Publish CLI to Homebrew tap"
 id: "024"
-status: in-progress
+status: completed
 priority: medium
 type: chore
 tags: ["release", "homebrew"]
