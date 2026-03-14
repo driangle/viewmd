@@ -1,4 +1,4 @@
-.PHONY: build test lint clean install
+.PHONY: build test lint clean install install-dev
 
 BINARY := viewmd
 BUILD_DIR := bin
@@ -16,6 +16,11 @@ lint:
 install: build
 	install -d $(DESTDIR)$(PREFIX)/bin
 	install -m 755 $(BUILD_DIR)/$(BINARY) $(DESTDIR)$(PREFIX)/bin/$(BINARY)
+
+install-dev:
+	go build -o $(BUILD_DIR)/$(BINARY)-dev ./cmd/viewmd
+	install -d $(DESTDIR)$(PREFIX)/bin
+	install -m 755 $(BUILD_DIR)/$(BINARY)-dev $(DESTDIR)$(PREFIX)/bin/$(BINARY)-dev
 
 clean:
 	rm -rf $(BUILD_DIR)

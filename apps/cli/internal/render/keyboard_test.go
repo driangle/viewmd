@@ -126,6 +126,29 @@ func TestMarkdownPageBackNavJS(t *testing.T) {
 	}
 }
 
+func TestEmptyDirectoryBackNavJS(t *testing.T) {
+	var buf bytes.Buffer
+	parent := "/parent"
+	err := render.RenderDirectoryPage(&buf, "empty-dir", &parent, nil, nil, "empty")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	out := buf.String()
+
+	if !strings.Contains(out, `addEventListener('keydown'`) {
+		t.Error("expected keydown listener on empty directory page")
+	}
+	if !strings.Contains(out, `e.key === 'ArrowLeft'`) {
+		t.Error("expected ArrowLeft handler on empty directory page")
+	}
+	if !strings.Contains(out, `e.key === 'Backspace'`) {
+		t.Error("expected Backspace handler on empty directory page")
+	}
+	if !strings.Contains(out, `.breadcrumb`) {
+		t.Error("expected breadcrumb selector in back-nav script")
+	}
+}
+
 func TestTextPageBackNavJS(t *testing.T) {
 	var buf bytes.Buffer
 	err := render.RenderTextPage(&buf, "main.go", "code", "/", "code", "go", nil)
