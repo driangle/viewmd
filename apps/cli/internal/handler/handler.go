@@ -67,7 +67,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fullPath := filepath.Join(h.root, reqPath)
 	info, err := os.Stat(fullPath)
 	if err != nil {
-		http.NotFound(w, r)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusNotFound)
+		parentHref := parentHrefFromPath(reqPath)
+		render.RenderNotFoundPage(w, parentHref)
 		return
 	}
 

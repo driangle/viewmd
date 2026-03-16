@@ -83,6 +83,12 @@ type unsupportedData struct {
 	WatchMode    bool
 }
 
+// notFoundData holds template data for the 404 page.
+type notFoundData struct {
+	ParentHref string
+	Version    string
+}
+
 // directoryData holds template data for the directory listing page.
 type directoryData struct {
 	DisplayPath string

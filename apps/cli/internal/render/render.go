@@ -102,6 +102,15 @@ func RenderImagePage(w io.Writer, fileName string, fileSize int64, parentHref st
 	return templates.ExecuteTemplate(w, "image.html", data)
 }
 
+// RenderNotFoundPage writes a styled 404 page.
+func RenderNotFoundPage(w io.Writer, parentHref string) error {
+	data := notFoundData{
+		ParentHref: parentHref,
+		Version:    Version,
+	}
+	return templates.ExecuteTemplate(w, "notfound.html", data)
+}
+
 // RenderDirectoryPage writes a full HTML page for a directory listing.
 // parentHref is nil for the root directory.
 // emptyReason is "" when items exist, "empty" for truly empty dirs,
