@@ -70,7 +70,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusNotFound)
 		parentHref := parentHrefFromPath(reqPath)
-		render.RenderNotFoundPage(w, parentHref)
+		breadcrumbs := render.BuildBreadcrumbs(reqPath, h.root)
+		render.RenderNotFoundPage(w, reqPath, parentHref, breadcrumbs)
 		return
 	}
 

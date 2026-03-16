@@ -103,10 +103,12 @@ func RenderImagePage(w io.Writer, fileName string, fileSize int64, parentHref st
 }
 
 // RenderNotFoundPage writes a styled 404 page.
-func RenderNotFoundPage(w io.Writer, parentHref string) error {
+func RenderNotFoundPage(w io.Writer, path string, parentHref string, breadcrumbs []BreadcrumbSegment) error {
 	data := notFoundData{
-		ParentHref: parentHref,
-		Version:    Version,
+		Path:        path,
+		ParentHref:  parentHref,
+		Breadcrumbs: breadcrumbs,
+		Version:     Version,
 	}
 	return templates.ExecuteTemplate(w, "notfound.html", data)
 }

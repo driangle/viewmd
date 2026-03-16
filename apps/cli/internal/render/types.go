@@ -85,8 +85,10 @@ type unsupportedData struct {
 
 // notFoundData holds template data for the 404 page.
 type notFoundData struct {
-	ParentHref string
-	Version    string
+	Path        string
+	ParentHref  string
+	Breadcrumbs []BreadcrumbSegment
+	Version     string
 }
 
 // directoryData holds template data for the directory listing page.
