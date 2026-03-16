@@ -1,108 +1,134 @@
 name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
 
 jobs:
-  build:
+  release:
+    name: Build and Release
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - goos: linux
-            goarch: amd64
-          - goos: linux
-            goarch: arm64
-          - goos: darwin
-            goarch: amd64
-          - goos: darwin
-            goarch: arm64
-          - goos: windows
-            goarch: amd64
-          - goos: windows
-            goarch: arm64
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: apps/cli/go.mod
-      - name: Build
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Build binaries
         working-directory: apps/cli
         env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          VERSION: ${{ github.event.release.tag_name }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          ext=""
-          if [ "$GOOS" = "windows" ]; then ext=".exe"; fi
-          binary="viewmd-${GOOS}-${GOARCH}${ext}"
-          go build -ldflags "-X main.version=${VERSION#v}" -o "$binary" ./cmd/viewmd
-          tar czf "viewmd-${VERSION}-${GOOS}-${GOARCH}.tar.gz" "$binary"
-          sha256sum "viewmd-${VERSION}-${GOOS}-${GOARCH}.tar.gz" > "viewmd-${VERSION}-${GOOS}-${GOARCH}.tar.gz.sha256"
-      - name: Upload assets to release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ github.event.release.tag_name }}
-        run: |
-          cd apps/cli
-          gh release upload "$VERSION" viewmd-${VERSION}-*.tar.gz viewmd-${VERSION}-*.sha256
+          mkdir -p ../../dist
 
-  update-homebrew:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Update Homebrew formula
-        env:
-          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-          VERSION: ${{ github.event.release.tag_name }}
-        run: |
-          ver="${VERSION#v}"
-          base_url="https://github.com/driangle/viewmd/releases/download/${VERSION}"
+          for platform in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do
+            GOOS="${platform%/*}"
+            GOARCH="${platform#*/}"
+            ext=""
+            if [ "$GOOS" = "windows" ]; then ext=".exe"; fi
+            binary="viewmd-${GOOS}-${GOARCH}${ext}"
 
-          # Download checksums
-          for platform in darwin-amd64 darwin-arm64 linux-amd64 linux-arm64; do
-            gh release download "$VERSION" \
-              --repo driangle/viewmd \
-              --pattern "viewmd-${VERSION}-${platform}.tar.gz.sha256"
+            echo "Building for ${GOOS}/${GOARCH}..."
+            GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "-X main.version=${VERSION}" -o "../../dist/${binary}" ./cmd/viewmd
           done
 
-          # Extract SHA256 values
-          sha_darwin_arm64=$(awk '{print $1}' "viewmd-${VERSION}-darwin-arm64.tar.gz.sha256")
-          sha_darwin_amd64=$(awk '{print $1}' "viewmd-${VERSION}-darwin-amd64.tar.gz.sha256")
-          sha_linux_arm64=$(awk '{print $1}' "viewmd-${VERSION}-linux-arm64.tar.gz.sha256")
-          sha_linux_amd64=$(awk '{print $1}' "viewmd-${VERSION}-linux-amd64.tar.gz.sha256")
+      - name: Compress binaries
+        working-directory: dist
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          for platform in linux-amd64 linux-arm64 darwin-amd64 darwin-arm64; do
+            tar -czf "viewmd-${TAG}-${platform}.tar.gz" "viewmd-${platform}"
+          done
 
-          # Generate formula
-          cat > viewmd.rb << FORMULA
+          for platform in windows-amd64 windows-arm64; do
+            zip "viewmd-${TAG}-${platform}.zip" "viewmd-${platform}.exe"
+          done
+
+      - name: Generate checksums
+        working-directory: dist
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          sha256sum viewmd-${TAG}-*.tar.gz viewmd-${TAG}-*.zip > checksums.txt
+          cat checksums.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/viewmd-${{ steps.version.outputs.tag }}-linux-amd64.tar.gz
+            dist/viewmd-${{ steps.version.outputs.tag }}-linux-arm64.tar.gz
+            dist/viewmd-${{ steps.version.outputs.tag }}-darwin-amd64.tar.gz
+            dist/viewmd-${{ steps.version.outputs.tag }}-darwin-arm64.tar.gz
+            dist/viewmd-${{ steps.version.outputs.tag }}-windows-amd64.zip
+            dist/viewmd-${{ steps.version.outputs.tag }}-windows-arm64.zip
+            dist/checksums.txt
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Homebrew formula
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          # Extract SHA256 checksums from checksums.txt
+          cd dist
+          SHA256_DARWIN_ARM64=$(grep "darwin-arm64.tar.gz" checksums.txt | awk '{print $1}')
+          SHA256_DARWIN_AMD64=$(grep "darwin-amd64.tar.gz" checksums.txt | awk '{print $1}')
+          SHA256_LINUX_ARM64=$(grep "linux-arm64.tar.gz" checksums.txt | awk '{print $1}')
+          SHA256_LINUX_AMD64=$(grep "linux-amd64.tar.gz" checksums.txt | awk '{print $1}')
+          cd ..
+
+          # Clone the homebrew-tap repository
+          git clone https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/driangle/homebrew-tap.git tap-repo
+          cd tap-repo
+
+          # Generate the formula file
+          cat > Formula/viewmd.rb << 'EOF'
           class Viewmd < Formula
             desc "Minimal file viewer for the browser — renders markdown, code, images, and directories"
             homepage "https://github.com/driangle/viewmd"
-            version "${ver}"
+            version "VERSION_PLACEHOLDER"
             license "MIT"
 
             on_macos do
               on_arm do
-                url "${base_url}/viewmd-${VERSION}-darwin-arm64.tar.gz"
-                sha256 "${sha_darwin_arm64}"
+                url "https://github.com/driangle/viewmd/releases/download/TAG_PLACEHOLDER/viewmd-TAG_PLACEHOLDER-darwin-arm64.tar.gz"
+                sha256 "SHA256_DARWIN_ARM64_PLACEHOLDER"
               end
               on_intel do
-                url "${base_url}/viewmd-${VERSION}-darwin-amd64.tar.gz"
-                sha256 "${sha_darwin_amd64}"
+                url "https://github.com/driangle/viewmd/releases/download/TAG_PLACEHOLDER/viewmd-TAG_PLACEHOLDER-darwin-amd64.tar.gz"
+                sha256 "SHA256_DARWIN_AMD64_PLACEHOLDER"
               end
             end
 
             on_linux do
               on_arm do
-                url "${base_url}/viewmd-${VERSION}-linux-arm64.tar.gz"
-                sha256 "${sha_linux_arm64}"
+                url "https://github.com/driangle/viewmd/releases/download/TAG_PLACEHOLDER/viewmd-TAG_PLACEHOLDER-linux-arm64.tar.gz"
+                sha256 "SHA256_LINUX_ARM64_PLACEHOLDER"
               end
               on_intel do
-                url "${base_url}/viewmd-${VERSION}-linux-amd64.tar.gz"
-                sha256 "${sha_linux_amd64}"
+                url "https://github.com/driangle/viewmd/releases/download/TAG_PLACEHOLDER/viewmd-TAG_PLACEHOLDER-linux-amd64.tar.gz"
+                sha256 "SHA256_LINUX_AMD64_PLACEHOLDER"
               end
             end
 
@@ -117,28 +143,27 @@ jobs:
               assert_match version.to_s, shell_output("#{bin}/viewmd --version")
             end
           end
-          FORMULA
+          EOF
+
+          # Replace placeholders with actual values
+          sed -i "s/VERSION_PLACEHOLDER/${VERSION}/g" Formula/viewmd.rb
+          sed -i "s/TAG_PLACEHOLDER/${TAG}/g" Formula/viewmd.rb
+          sed -i "s/SHA256_DARWIN_ARM64_PLACEHOLDER/${SHA256_DARWIN_ARM64}/g" Formula/viewmd.rb
+          sed -i "s/SHA256_DARWIN_AMD64_PLACEHOLDER/${SHA256_DARWIN_AMD64}/g" Formula/viewmd.rb
+          sed -i "s/SHA256_LINUX_ARM64_PLACEHOLDER/${SHA256_LINUX_ARM64}/g" Formula/viewmd.rb
+          sed -i "s/SHA256_LINUX_AMD64_PLACEHOLDER/${SHA256_LINUX_AMD64}/g" Formula/viewmd.rb
 
           # Remove leading whitespace from heredoc
-          sed -i 's/^          //' viewmd.rb
+          sed -i 's/^          //' Formula/viewmd.rb
 
-          # Push to homebrew-tap repo
-          encoded=$(base64 -w 0 viewmd.rb)
-          existing_sha=$(gh api repos/driangle/homebrew-tap/contents/Formula/viewmd.rb --jq '.sha' 2>&1 || true)
-          # Clear if the API returned an error (file doesn't exist yet)
-          if [[ "$existing_sha" == *"Not Found"* ]] || [[ -z "$existing_sha" ]]; then
-            existing_sha=""
-          fi
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          api_args=(
-            repos/driangle/homebrew-tap/contents/Formula/viewmd.rb
-            --method PUT
-            --field "message=Update viewmd to ${ver}"
-            --field "content=${encoded}"
-            --field branch=main
-          )
-          if [ -n "$existing_sha" ]; then
-            api_args+=(--field "sha=${existing_sha}")
-          fi
+          # Commit and push
+          git add Formula/viewmd.rb
+          git commit -m "Update viewmd formula to ${VERSION}
 
-          gh api "${api_args[@]}"
+          Auto-generated by release workflow
+          Release: https://github.com/driangle/viewmd/releases/tag/${TAG}"
+          git push origin main
