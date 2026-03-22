@@ -54,6 +54,9 @@ func main() {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: Port %d is already in use.\n", port)
+		if info := describePortOwner(port); info != "" {
+			fmt.Fprintf(os.Stderr, "  %s\n", info)
+		}
 		os.Exit(1)
 	}
 
