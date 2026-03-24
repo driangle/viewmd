@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="{{.Theme}}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <base href="{{.BaseURL}}">
     <title>{{.FileName}}</title>
     <style>
         :root {
@@ -40,71 +39,19 @@
         .frontmatter table { width: auto; margin: 8px 0; border: none; background: none; }
         .frontmatter td { border: none; padding: 2px 12px 2px 0; background: none; }
         .frontmatter .fm-key { font-weight: 600; color: var(--color-text); }
-        .breadcrumb { font-size: 0.85em; color: var(--color-text-secondary); }
-        .breadcrumb a { color: var(--color-text-secondary); text-decoration: none; }
-        .breadcrumb a:hover { color: var(--color-link); text-decoration: underline; }
-        .breadcrumb .separator { margin: 0 4px; color: var(--color-border); }
-        .breadcrumb .current { color: var(--color-text); font-weight: 600; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border-light); }
-        .copy-btn, .export-btn { background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 4px 12px; font-size: 0.8em; cursor: pointer; color: var(--color-text-secondary); font-family: var(--font-sans); transition: background 0.1s; text-decoration: none; }
-        .copy-btn:hover, .export-btn:hover { background: var(--color-border-light); color: var(--color-text); }
-        footer { margin-top: 40px; padding-top: 8px; border-top: 1px solid var(--color-border-light); font-size: 0.75em; color: var(--color-text-secondary); }
+        .top-bar .title { font-size: 0.85em; color: var(--color-text-secondary); font-weight: 600; }
 {{template "theme-vars-dark"}}
 {{template "theme-toggle-css"}}
     </style>
-{{template "theme-init"}}
 </head>
 <body>
     <div class="top-bar">
-        <nav class="breadcrumb" data-parent-href="{{.ParentHref}}">{{range $i, $seg := .Breadcrumbs}}{{if $i}}<span class="separator">/</span>{{end}}{{if $seg.Href}}<a href="{{$seg.Href}}">{{$seg.Name}}</a>{{else}}<span class="current">{{$seg.Name}}</span>{{end}}{{end}}</nav>
-        <div>
-            <a class="export-btn" id="export-btn" href="{{.FileName}}?export=html" title="Download as self-contained HTML">Export as HTML</a>
-            <button class="copy-btn" onclick="copyRaw(this)">Copy</button>
-            {{template "theme-toggle"}}
-        </div>
+        <span class="title">{{.FileName}}</span>
+        <div>{{template "theme-toggle"}}</div>
     </div>
     {{if .FrontmatterRows}}<div class="frontmatter"><table>{{range .FrontmatterRows}}<tr><td class="fm-key">{{.Key}}</td><td>{{.Value}}</td></tr>
 {{end}}</table></div>
 {{end}}{{.BodyHTML}}
-    <textarea id="raw-content" style="display:none;">{{.RawContent}}</textarea>
-    <script>
-    function copyRaw(btn) {
-        var text = document.getElementById('raw-content').value;
-        navigator.clipboard.writeText(text).then(function() {
-            btn.textContent = 'Copied!';
-            setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
-        });
-    }
-    (function() {
-        var btn = document.getElementById('export-btn');
-        function syncTheme() {
-            var theme = document.documentElement.getAttribute('data-theme') || 'light';
-            var u = new URL(btn.href, window.location.origin);
-            u.searchParams.set('theme', theme);
-            btn.href = u.toString();
-        }
-        syncTheme();
-        new MutationObserver(syncTheme).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
-    })();
-    </script>
-    <footer>viewmd {{.Version}}</footer>
-    <script>
-    document.addEventListener('keydown', function(e) {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
-            var bc = document.querySelector('.breadcrumb');
-            var href = bc ? bc.getAttribute('data-parent-href') : null;
-            if (href) {
-                e.preventDefault();
-                var path = window.location.pathname.replace(/\/+$/, '');
-                var name = path.split('/').pop() || '';
-                var u = new URL(href, window.location.origin);
-                u.searchParams.set('from', name);
-                window.location.href = u.toString();
-            }
-        }
-    });
-    </script>
-{{if .WatchMode}}{{template "watch-script"}}{{end}}
 </body>
 </html>

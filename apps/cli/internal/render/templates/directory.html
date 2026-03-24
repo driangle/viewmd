@@ -49,6 +49,8 @@
         .search-no-results { padding: 16px 10px; color: var(--color-text-secondary); font-size: 0.9em; }
         .dir-notice { padding: 40px 10px; text-align: center; color: var(--color-text-secondary); font-size: 0.9em; line-height: 1.5; }
         .dir-notice .dir-notice-hint { font-size: 0.8em; margin-top: 6px; }
+        .zip-btn { display: inline-block; padding: 3px 10px; font-size: 0.75em; color: var(--color-text-secondary); background: var(--color-bg-subtle); border: 1px solid var(--color-border-light); border-radius: var(--radius); text-decoration: none; cursor: pointer; transition: background 0.1s, color 0.1s; }
+        .zip-btn:hover { background: var(--color-border-light); color: var(--color-text); }
 {{template "theme-vars-dark"}}
 {{template "theme-toggle-css"}}
     </style>
@@ -57,7 +59,7 @@
 <body>
     <div class="top-bar">
         <nav class="breadcrumb" data-parent-href="{{if .HasParent}}/{{.ParentHref}}{{else}}/{{end}}">{{range $i, $seg := .Breadcrumbs}}{{if $i}}<span class="separator">/</span>{{end}}{{if $seg.Href}}<a href="{{$seg.Href}}">{{$seg.Name}}</a>{{else}}<span class="current">{{$seg.Name}}</span>{{end}}{{end}}</nav>
-        <div>{{template "theme-toggle"}}</div>
+        <div><a class="zip-btn" id="export-btn" href="?export=zip" title="Download as ZIP with markdown converted to HTML">Export as HTML</a> {{template "theme-toggle"}}</div>
     </div>
 {{if .EmptyReason}}{{if eq .EmptyReason "empty"}}    <div class="dir-notice">
         <div>This directory is empty.</div>
@@ -80,6 +82,20 @@
 {{end}}    </ul>
     <div class="kb-hint">&#x2191;&#x2193; navigate &middot; Enter/&#x2192; open &middot; &#x2190; back &middot; / search</div>
 {{end}}
+    <script>
+    (function() {
+        var btn = document.getElementById('export-btn');
+        if (!btn) return;
+        function syncTheme() {
+            var theme = document.documentElement.getAttribute('data-theme') || 'light';
+            var u = new URL(btn.href, window.location.origin);
+            u.searchParams.set('theme', theme);
+            btn.href = u.toString();
+        }
+        syncTheme();
+        new MutationObserver(syncTheme).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+    })();
+    </script>
     <footer>viewmd {{.Version}}</footer>
 {{if not .EmptyReason}}    <script>
     (function() {

@@ -113,6 +113,22 @@ func RenderNotFoundPage(w io.Writer, path string, parentHref string, breadcrumbs
 	return templates.ExecuteTemplate(w, "notfound.html", data)
 }
 
+// RenderExportPage writes a self-contained HTML page for a markdown file,
+// suitable for offline viewing in a browser. Includes all styling inline
+// with no server dependencies. Theme should be "dark" or "light".
+func RenderExportPage(w io.Writer, fileName string, meta []frontmatter.KeyValue, bodyHTML string, theme string) error {
+	if theme != "dark" {
+		theme = "light"
+	}
+	data := exportData{
+		FileName:        fileName,
+		FrontmatterRows: meta,
+		BodyHTML:        template.HTML(bodyHTML),
+		Theme:           theme,
+	}
+	return templates.ExecuteTemplate(w, "export.html", data)
+}
+
 // RenderDirectoryPage writes a full HTML page for a directory listing.
 // parentHref is nil for the root directory.
 // emptyReason is "" when items exist, "empty" for truly empty dirs,

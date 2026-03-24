@@ -42,5 +42,5 @@ viewmd -w       # Watch for changes, auto-reload browser
 - **Markdown** — Rendered HTML with styled typography
 - **Code/text** — Syntax-highlighted display
 - **Images** — Inline rendering
-- **Directories** — File listing with keyboard navigation and search
+- **Directories** — File listing with keyboard navigation, search, and ZIP export
 - **Other files** — Download or "can't preview" message

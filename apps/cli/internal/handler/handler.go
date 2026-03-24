@@ -60,6 +60,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if reqPath == "" {
+		if r.URL.Query().Get("export") == "zip" {
+			h.serveZipExport(w, r, h.root, "")
+			return
+		}
 		h.serveDirectoryListing(w, r, ".")
 		return
 	}
@@ -76,6 +80,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if info.IsDir() {
+		if r.URL.Query().Get("export") == "zip" {
+			h.serveZipExport(w, r, fullPath, reqPath)
+			return
+		}
 		if h.AutoReadme {
 			readme := filepath.Join(fullPath, "README.md")
 			if _, err := os.Stat(readme); err == nil {
@@ -93,6 +101,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get("raw") == "1" {
 		http.ServeFile(w, r, fullPath)
 		return
+	}
+
+	if r.URL.Query().Get("export") == "html" {
+		ext := strings.ToLower(filepath.Ext(fullPath))
+		if ext == ".md" || ext == ".markdown" {
+			serveHTMLExport(w, r, fullPath)
+			return
+		}
 	}
 
 	parentHref := parentHrefFromPath(reqPath)

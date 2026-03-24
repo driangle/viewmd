@@ -91,6 +91,14 @@ type notFoundData struct {
 	Version     string
 }
 
+// exportData holds template data for standalone exported HTML pages.
+type exportData struct {
+	FileName        string
+	FrontmatterRows []frontmatter.KeyValue
+	BodyHTML        template.HTML
+	Theme           string // "dark" or "light"
+}
+
 // directoryData holds template data for the directory listing page.
 type directoryData struct {
 	DisplayPath string
