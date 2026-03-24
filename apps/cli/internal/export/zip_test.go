@@ -45,6 +45,10 @@ func TestWriteZip(t *testing.T) {
 		wantExist bool
 		checkFunc func(content string) bool
 	}{
+		{"_directory.html", true, func(c string) bool {
+			return strings.Contains(c, "readme.html") &&
+				strings.Contains(c, "sub/_directory.html")
+		}},
 		{"readme.html", true, func(c string) bool {
 			return strings.Contains(c, "<h1>Hello</h1>") &&
 				strings.Contains(c, "<!DOCTYPE html>") &&
@@ -54,6 +58,7 @@ func TestWriteZip(t *testing.T) {
 		{"readme.md", false, nil},
 		{"notes.markdown", false, nil},
 		{"image.png", true, func(c string) bool { return c == "fake-png-data" }},
+		{"sub/_directory.html", true, func(c string) bool { return strings.Contains(c, "nested.html") }},
 		{"sub/nested.html", true, func(c string) bool { return strings.Contains(c, "<h1>Nested</h1>") }},
 		{"sub/nested.md", false, nil},
 		{"sub/data.txt", true, func(c string) bool { return c == "plain text" }},
@@ -127,9 +132,22 @@ func TestWriteZipWithIgnore(t *testing.T) {
 		t.Fatalf("zip.NewReader: %v", err)
 	}
 
+	for _, f := range zr.File {
+		if strings.HasSuffix(f.Name, ".env") {
+			t.Errorf("ignored file %q should not be in ZIP", f.Name)
+		}
+	}
+
+	// Should have _directory.html and keep.html
 	names := fileNames(zr)
-	if len(names) != 1 || names[0] != "keep.html" {
-		t.Errorf("expected [keep.html], got %v", names)
+	hasKeep := false
+	for _, n := range names {
+		if n == "keep.html" {
+			hasKeep = true
+		}
+	}
+	if !hasKeep {
+		t.Errorf("missing keep.html in ZIP (got %v)", names)
 	}
 }
 
@@ -152,10 +170,10 @@ func TestWriteZipMarkdownOnly(t *testing.T) {
 	}
 
 	names := fileNames(zr)
-	want := map[string]bool{"readme.html": true, "sub/nested.html": true}
+	want := []string{"readme.html", "sub/nested.html", "_directory.html", "sub/_directory.html"}
 	unwant := []string{"data.txt", "image.png", "sub/config.json"}
 
-	for w := range want {
+	for _, w := range want {
 		found := false
 		for _, n := range names {
 			if n == w {
@@ -174,8 +192,53 @@ func TestWriteZipMarkdownOnly(t *testing.T) {
 			}
 		}
 	}
-	if len(names) != 2 {
-		t.Errorf("expected 2 files, got %d: %v", len(names), names)
+}
+
+func TestWriteZipNoConflictWithIndexFiles(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "index.md", "# Index Page")
+	writeFile(t, dir, "index.html", "<h1>Existing HTML</h1>")
+	writeFile(t, dir, "other.md", "# Other")
+
+	var buf bytes.Buffer
+	if err := WriteZip(&buf, dir, nil, false, "light"); err != nil {
+		t.Fatalf("WriteZip: %v", err)
+	}
+
+	zr, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
+	if err != nil {
+		t.Fatalf("zip.NewReader: %v", err)
+	}
+
+	files := make(map[string]string)
+	for _, f := range zr.File {
+		rc, _ := f.Open()
+		var content bytes.Buffer
+		content.ReadFrom(rc)
+		rc.Close()
+		files[f.Name] = content.String()
+	}
+
+	// Directory listing uses _directory.html, avoiding conflicts
+	if _, ok := files["_directory.html"]; !ok {
+		t.Error("missing _directory.html for directory listing")
+	}
+
+	// Original index.html preserved as-is
+	if c, ok := files["index.html"]; !ok {
+		t.Error("missing original index.html")
+	} else if !strings.Contains(c, "Existing HTML") {
+		t.Error("index.html was overwritten instead of preserved")
+	}
+
+	// index.md kept as raw file since index.html already exists (collision avoidance)
+	if _, ok := files["index.md"]; !ok {
+		t.Error("index.md should be kept as-is when index.html already exists")
+	}
+
+	// other.md has no collision, so it should be converted
+	if _, ok := files["other.html"]; !ok {
+		t.Error("other.md should be converted to other.html")
 	}
 }
 

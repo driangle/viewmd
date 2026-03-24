@@ -116,7 +116,8 @@ func RenderNotFoundPage(w io.Writer, path string, parentHref string, breadcrumbs
 // RenderExportPage writes a self-contained HTML page for a markdown file,
 // suitable for offline viewing in a browser. Includes all styling inline
 // with no server dependencies. Theme should be "dark" or "light".
-func RenderExportPage(w io.Writer, fileName string, meta []frontmatter.KeyValue, bodyHTML string, theme string) error {
+// parentHref is a relative link to the parent directory listing (empty to disable).
+func RenderExportPage(w io.Writer, fileName string, meta []frontmatter.KeyValue, bodyHTML string, theme string, parentHref string) error {
 	if theme != "dark" {
 		theme = "light"
 	}
@@ -125,8 +126,26 @@ func RenderExportPage(w io.Writer, fileName string, meta []frontmatter.KeyValue,
 		FrontmatterRows: meta,
 		BodyHTML:        template.HTML(bodyHTML),
 		Theme:           theme,
+		ParentHref:      parentHref,
 	}
 	return templates.ExecuteTemplate(w, "export.html", data)
+}
+
+// RenderExportDirectoryPage writes a self-contained directory index page
+// suitable for offline browsing. Includes keyboard navigation but no search.
+func RenderExportDirectoryPage(w io.Writer, displayPath string, parentHref string, items []DirEntry, breadcrumbs []BreadcrumbSegment, theme string) error {
+	if theme != "dark" {
+		theme = "light"
+	}
+	data := exportDirData{
+		DisplayPath: displayPath,
+		HasParent:   parentHref != "",
+		ParentHref:  parentHref,
+		Breadcrumbs: breadcrumbs,
+		Items:       items,
+		Theme:       theme,
+	}
+	return templates.ExecuteTemplate(w, "export-directory.html", data)
 }
 
 // RenderDirectoryPage writes a full HTML page for a directory listing.

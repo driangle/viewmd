@@ -53,5 +53,15 @@
     {{if .FrontmatterRows}}<div class="frontmatter"><table>{{range .FrontmatterRows}}<tr><td class="fm-key">{{.Key}}</td><td>{{.Value}}</td></tr>
 {{end}}</table></div>
 {{end}}{{.BodyHTML}}
+{{if .ParentHref}}    <script>
+    document.addEventListener('keydown', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+            e.preventDefault();
+            window.location.href = '{{.ParentHref}}';
+        }
+    });
+    </script>
+{{end}}
 </body>
 </html>

@@ -61,7 +61,7 @@ func serveHTMLExport(w http.ResponseWriter, r *http.Request, fullPath string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, htmlName))
 
-	if err := render.RenderExportPage(w, htmlName, meta, bodyHTML, theme); err != nil {
+	if err := render.RenderExportPage(w, htmlName, meta, bodyHTML, theme, ""); err != nil {
 		http.Error(w, fmt.Sprintf("Error rendering page: %v", err), http.StatusInternalServerError)
 	}
 }

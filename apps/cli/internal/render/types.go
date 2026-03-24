@@ -97,6 +97,17 @@ type exportData struct {
 	FrontmatterRows []frontmatter.KeyValue
 	BodyHTML        template.HTML
 	Theme           string // "dark" or "light"
+	ParentHref      string // relative link to parent directory listing
+}
+
+// exportDirData holds template data for exported directory index pages.
+type exportDirData struct {
+	DisplayPath string
+	HasParent   bool
+	ParentHref  string
+	Breadcrumbs []BreadcrumbSegment
+	Items       []DirEntry
+	Theme       string
 }
 
 // directoryData holds template data for the directory listing page.
