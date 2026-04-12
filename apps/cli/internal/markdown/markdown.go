@@ -14,6 +14,7 @@ import (
 
 	"github.com/driangle/viewmd/apps/cli/internal/frontmatter"
 	"github.com/driangle/viewmd/apps/cli/internal/render"
+	"github.com/driangle/viewmd/apps/cli/internal/wikilink"
 )
 
 var converter = goldmark.New(
@@ -45,6 +46,7 @@ func ServeMarkdown(w http.ResponseWriter, filePath string, baseURL string, paren
 	}
 
 	meta, body := frontmatter.Parse(string(content))
+	body = wikilink.Resolve(body, baseURL)
 
 	bodyHTML, err := Convert(body)
 	if err != nil {
